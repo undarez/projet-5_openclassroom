@@ -74,7 +74,8 @@ renderProduct(article);
 
 // articleTab est un tableau qui contien les articles du panier
 const articleTab = []
-const inlocalStorage = JSON.parse(localStorage.getItem("object"))
+const inlocalStorage = JSON.parse (localStorage.getItem("object"))
+// const inlocalStorage = JSON.parse(localStorage.getItem("object"))
 
 // creer une function addToCart qui ajout le produit au panier
 // creer une function click qui au clique sur le bouton ajout le produit

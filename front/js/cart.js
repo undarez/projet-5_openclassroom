@@ -1,184 +1,162 @@
-// ici nous allons creer plusieur functions qui permet 
-// 1: sauvegarder l'article dans le panier
-// 2: gerer le panier vide
-// 3: Ajouter un article dans le panier
-// 4: Retirer un article du panier
-// 5: Changer la quantiter de l'article
-// 6: Calculer la quantiter total des produits dans le panier ainsi que de return le panier a 0
-// 7: Calculer le prix total 
-
-// utilisation de localstorage qui sert a stocker des elements pour les utiliser en les convertissant exemple json.stringify transform et prend l'objet pour le transformer en chaine de caractere
-
-// json.parse prend la chaine de caractere pour la transformer en objet.
-
-// appel des id 
-// const quantityTotal = document.getElementById()
-// creer une variable qui contient le code html du panier qui débute a la ligne 102
-let configPanier = document.getElementById("cart__items");
 
 
+let cart = JSON.parse(localStorage.getItem("object"));
 
-// ========1 sauvegarder le produit
-function savecanape(canape){
-    localStorage.setItem("canape", json.stringify(canape)) 
-    // set item sert a stockerchaque element
+let articles = document.querySelector("#cart__items");
+let totalPrice = document.querySelector("#totalPrice");
+let totalQuantity = document.querySelector("#totalQuantity");
+let totalArticlesPrice = 0;
+let totalArticlesQuantity = 0;
+
+async function showCart()
+{
+
+  for (let i=0; i<cart.length; i++)
+  {
+      let price = await getProductPriceById(cart[i]._id);
+
+      totalArticlesQuantity += parseInt(cart[i].qte);
+      totalArticlesPrice += parseInt(cart[i].qte * price);      
+
+      let article = `<article class="cart__item" data-id="${cart[i].id}" data-color="${cart[i].color}">
+                  <div class="cart__item__img">
+                    <img src="${cart[i].imageUrl}" alt="${cart[i].altTxt}">
+                  </div>
+                  <div class="cart__item__content">
+                    <div class="cart__item__content__description">
+                      <h2>${cart[i].name}</h2>
+                      <p>Vert</p>
+                      <p>${price} €</p>
+                    </div>
+                    <div class="cart__item__content__settings">
+                      <div class="cart__item__content__settings__quantity">
+                        <p>Qté : </p>
+                        <input  data-id="${cart[i].id}" data-color="${cart[i].color}" type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${cart[i].qte}">
+                      </div>
+                      <div class="cart__item__content__settings__delete">
+                        <p  data-id="${cart[i].id}" data-color="${cart[i].color}" class="deleteItem">Supprimer</p>
+                      </div>
+                    </div>
+                  </div>
+                </article>`;
+
+    articles.innerHTML += article;
+
+    totalPrice.innerHTML = totalArticlesPrice;
+    totalQuantity.innerHTML = totalArticlesQuantity;
+
+    updateQuantity();
+    deleteItemCard();
+
+  }
+}
+// on appelle la fonction qui rempli la page
+showCart();
+
+
+
+// Mise à jour de la quantité de l'article
+function updateQuantity() {
+  const quantityInputs = document.querySelectorAll(".itemQuantity");
+  quantityInputs.forEach((quantityInput) => {
+      quantityInput.addEventListener("change", (event) => {   
+          event.preventDefault();          
+          const inputValue = event.target.value;
+          const dataId = event.target.getAttribute("data-id");
+          const dataColor = event.target.getAttribute("data-color");
+          let cartItems = localStorage.getItem("object");
+          let items = JSON.parse(cartItems);
+
+          items = items.map((item, index) => {              
+              if (item.id === dataId && item.color === dataColor) {
+                  item.quantity = inputValue;                  
+              }
+              return item;
+          });
+
+          if (inputValue > 100 || inputValue < 1) {
+              alert("La quantité doit etre comprise entre 1 et 100");
+              return;
+          }
+          let itemsStr = JSON.stringify(items);
+          localStorage.setItem("object", itemsStr);
+          updateCart();          
+      });
+  });
+}
+
+// On récupère le prix de l'article suivant son id dans la l'API avec l'artId
+async function getProductPriceById(artId) {
+  return fetch("http://localhost:3000/api/products/")
+      .then(function (res) {
+          return res.json();
+      })
+      .catch((err) => {
+          // Une erreur est survenue
+          console.log("erreur");
+      })
+      .then((response) => {
+          for (let i=0; i<response.length; i++)
+          {                         
+              if (response[i]._id == artId)
+              {                
+                return response[i].price;
+              }
+          }          
+      });
 }
 
 
-// ========2 gerer le panier vide
+// Suppression de l'article choisi
+function deleteItemCard() {
+  let cartItem = JSON.parse(localStorage.getItem("object")); 
+  const deleteButtons = document.querySelectorAll(".deleteItem");
+  deleteButtons.forEach((deleteButton) => {
+      deleteButton.addEventListener("click", (event) => {
+          event.preventDefault();
+          const deleteId = event.target.getAttribute("data-id");
+          const deleteColor = event.target.getAttribute("data-color");
+          cartItem = cartItem.filter(
+              (element) => !(element.id == deleteId && element.color == deleteColor)
+          );          
+          deleteConfirm = window.confirm(
+              "Etes vous sûr de vouloir supprimer cet article ?"
+          );
+          if (deleteConfirm == true) {
+              localStorage.setItem("object", JSON.stringify(cartItem));
+              alert("Article supprimé avec succès");
+          }
 
-function panier(){
-    let canape = localStorage.getItem("canape");
-    if(canape == null){
-        return[]
-    }else{
-        return json.parse(canape)
-    }
-    // get item sert a recuperer l'element
+          const card = deleteButton.closest(".cart__item");
+          card.remove();    
+          updateCart();
+
+          const deleteKanap = JSON.parse(localStorage.getItem("object"));
+          if (deleteKanap.length === 0) {
+              localStorage.removeItem("object");
+              alert('Panier vide, retour à l\'accueil.');
+              window.location.href = "index.html";
+          }
+      });
+
+  });
 }
 
-// ========3 ajouter un produit au panier
-// utilisation de find qui est une function qui cherche dans un tableau s'il existe un argument qui correspond avec la condition
+// Mise à jour du panier dynamique
+async function updateCart() {
+  let cartItem = JSON.parse(localStorage.getItem("object"));
+  let totalQuantity = 0;
+  let totalPrice = 0;
+  
+  for (i = 0; i < cartItem.length; i++) 
+  {      
+      let price = await getProductPriceById(cartItem[i]._id);
+      totalQuantity += parseInt(cartItem[i].qte);
+      totalPrice += parseInt(price * cartItem[i].qte);                  
+  }
+  
+  console.log(totalPrice);
 
-function addcanape(product){
-    let canape = panier()
-    let foundProduct = canape.find(p=>p.id == product.id)
-    if (foundProduct != undefined){
-        foundProduct.quantity++;
-    } else canape.product = 1;
-    canape.push(product);
-    savecanape(canape)
-} 
-
-// ========4 retirer article du panier
-// La méthode Array.prototype.filter() est une méthode de l'objet Array qui crée et retourne un nouveau tableau contenant tous les éléments du tableau d'origine qui remplissent une condition spécifiée. La méthode filter() prend en argument une fonction de filtre qui est invoquée pour chaque élément du tableau. Lorsque la fonction de filtre renvoie true pour un élément donné, cet élément est inclus dans le nouveau tableau. Sinon, il est ignoré.
-
-function removeFromCanape(product){
-    let canape = panier();
-    canape = canape.filter(p=>p.id != product.id); 
-    savecanape(canape);
+  document.getElementById("totalQuantity").innerHTML = totalQuantity;
+  document.getElementById("totalPrice").innerHTML = totalPrice;
 }
-
-
-
-
-// ========6 calculer la quantiter
-
-function getNumberProduct(){
-    let canape =panier();
-    let number = 0;
-    for(let product of canape){
-        number += product.quantity;
-        return number;
-    }
-}
-
-
-// ========7 calculer prix total
-
-function getTotalPrice(){
-    let canape = panier();
-    let total = 0;
-    for(let product of canape){
-        total += product.quantity * product.price
-    }
-    return number;
-}
-
-// cree une variable pour aller chercher le localstorage
-const dataCart = JSON.parse (localStorage.getItem("object"))
-console.log(dataCart)
-
-
-// creer un edventlistener pour supprimer l'article du panier
-// variable qui récupere le boutton supprimer article
-// const deleteItem = document.querySelector(".deleteItem")
-
-// deleteItem.addEventListener("click", () => {
-//     // récuperer l'article a supprimer
-//     const cart__items = document.getElementById("cart__items")
-//     // supprimer l'article utiliser la metode remove
-//     cart__items.remove();
-
-//     console.log(cart__items)
-// })
-
-// ajout du text html article page cart.html
-// le dataCart es le localstorage le JSON.parse permet de le transformer un objet
-let inputQty;
-for( let i= 0; i< dataCart.length; i++){
-    configPanier.innerHTML += `
-     <article class="cart__item" data-id="${dataCart[i]._id}" data-color="{product-color}">
-    <div class="cart__item__img">
-      <img src="${dataCart[i].imageUrl
-      }" alt="Photographie d'un canapé">
-    </div>
-    <div class="cart__item__content">
-      <div class="cart__item__content__description">
-        <h2>${dataCart[i].name}</h2>
-        <p>${dataCart[i].color}</p>
-        <p>${dataCart[i].price}€</p>
-      </div>
-      <div class="cart__item__content__settings">
-        <div class="cart__item__content__settings__quantity">
-          <p id="qty" >Qté : ${dataCart[i].qte} </p>
-          <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="1">
-        </div>
-        <div class="cart__item__content__settings__delete">
-          <p class="deleteItem">Supprimer</p>
-        </div>
-      </div>
-    </div>
-    </article> `
-
-    
-    
-    
-    // ici je fait appel a eventlistener avec la fonction change qui permet a l'utilisateur de changer les qauntiter du panier target crée un nouvel objet avec une nouvelle valeur 
-    
-    // puis le datacart es transformer en chaine de caracterer pour etre renvoyer dans le local storage grace a setitem.
-    
-    const currentInpQty = document.querySelector(".itemQuantity")
-    inputQty = currentInpQty 
-    const objectQty = document.querySelector("#qty")
-
-    currentInpQty.addEventListener('change', function (event) {
-        objectQty.innerHTML = ` <p id="qty" >Qté : ${event.target.value} </p>`
-        const dataCart = JSON.parse (localStorage.getItem("object"))
-
-    
-        console.log(dataCart)
-        
-    })
-    
-} 
-console.log(inputQty.value)
-
-// total d'article dans le panier
-
-const inlocalStorage = JSON.parse(localStorage.getItem("object"))
-
-let totatQty = 0
-
-for(let item of inlocalStorage){
-    totatQty += item.quantity
-}
-
-// prix total dans le panier
-
-const totalQuantity = document.getElementById("totalQuantity")
-totalQuantity.innerHTML = totatQty
-
-
-console.log(totatQty)
-
-
-// currentInpQty = number(objectQty.value)
-// objectQty.addEventListener("change", (event)=>{
-//     inputQty = number(event.target.value)
-//     objectQty.innerHTML = `Qté : ${inputQty}`;
-//     Object.find((item) =>item._id === product._id).qty = inputQty
-//     localStorage.setItem("object", JSON.stringify("object"))
-// })
-
-// const dataCart = JSON.stringify (localStorage.setItem("object"))
