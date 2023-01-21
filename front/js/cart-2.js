@@ -113,12 +113,7 @@ for (let i = 0; i < dataCart.length; i++){
             console.log(totalQte)
         })
       
-        //  mise a jour du panier dynamique
-        // creer une function qui permet d'appeler le local storage 
         
-        // ce que l'on a besoin petit rappel totalQuantity = 0 la quantité
-        // totalPrice = 0 le prix
-        // appeler le local avec l'article donc ici c'est object
 
 
         

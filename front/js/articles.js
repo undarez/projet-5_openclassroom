@@ -63,5 +63,5 @@ const id = url.searchParams.get("id");
 function resultat (canape) {
     return canape._id === _id
 }
-console.log(resultat)
+// console.log(resultat)
 // // console.log(id);

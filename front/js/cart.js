@@ -8,33 +8,31 @@ let totalQuantity = document.querySelector("#totalQuantity");
 let totalArticlesPrice = 0;
 let totalArticlesQuantity = 0;
 
-async function showCart()
-{
+async function showCart() {
 
-  for (let i=0; i<cart.length; i++)
-  {
-      let price = await getProductPriceById(cart[i]._id);
+  for (let i = 0; i < cart.length; i++) {
+    let price = await getProductPriceById(cart[i]._id);
 
-      totalArticlesQuantity += parseInt(cart[i].qte);
-      totalArticlesPrice += parseInt(cart[i].qte * price);      
+    totalArticlesQuantity += parseInt(cart[i].qte);
+    totalArticlesPrice += parseInt(cart[i].qte * price);
 
-      let article = `<article class="cart__item" data-id="${cart[i].id}" data-color="${cart[i].color}">
+    let article = `<article class="cart__item" data-id="${cart[i]._id}" data-color="${cart[i].color}">
                   <div class="cart__item__img">
                     <img src="${cart[i].imageUrl}" alt="${cart[i].altTxt}">
                   </div>
                   <div class="cart__item__content">
                     <div class="cart__item__content__description">
                       <h2>${cart[i].name}</h2>
-                      <p>Vert</p>
-                      <p>${price} €</p>
+                      <p>${cart[i].color}</p>
+                      <p>${cart[i].price} €</p>
                     </div>
                     <div class="cart__item__content__settings">
                       <div class="cart__item__content__settings__quantity">
-                        <p>Qté : </p>
-                        <input  data-id="${cart[i].id}" data-color="${cart[i].color}" type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${cart[i].qte}">
+                        <p>Qté : ${cart[i].qte} </p>
+                        <input  data-id="${cart[i]._id}" data-color="${cart[i].color}" type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${cart[i].qte}">
                       </div>
                       <div class="cart__item__content__settings__delete">
-                        <p  data-id="${cart[i].id}" data-color="${cart[i].color}" class="deleteItem">Supprimer</p>
+                        <p  data-id="${cart[i]._id}" data-color="${cart[i].color}" class="deleteItem">Supprimer</p>
                       </div>
                     </div>
                   </div>
@@ -42,8 +40,8 @@ async function showCart()
 
     articles.innerHTML += article;
 
-    totalPrice.innerHTML = totalArticlesPrice;
-    totalQuantity.innerHTML = totalArticlesQuantity;
+    totalPrice.innertext = totalArticlesPrice;
+    totalQuantity.innertext = totalArticlesQuantity;
 
     updateQuantity();
     deleteItemCard();
@@ -59,104 +57,199 @@ showCart();
 function updateQuantity() {
   const quantityInputs = document.querySelectorAll(".itemQuantity");
   quantityInputs.forEach((quantityInput) => {
-      quantityInput.addEventListener("change", (event) => {   
-          event.preventDefault();          
-          const inputValue = event.target.value;
-          const dataId = event.target.getAttribute("data-id");
-          const dataColor = event.target.getAttribute("data-color");
-          let cartItems = localStorage.getItem("object");
-          let items = JSON.parse(cartItems);
+    quantityInput.addEventListener("change", (event) => {
+      event.preventDefault();
+      const inputValue = event.target.value;
+      const dataId = event.target.getAttribute("data-id");
+      const dataColor = event.target.getAttribute("data-color");
+      let cartItems = localStorage.getItem("object");
+      let items = JSON.parse(cartItems);
 
-          items = items.map((item, index) => {              
-              if (item.id === dataId && item.color === dataColor) {
-                  item.quantity = inputValue;                  
-              }
-              return item;
-          });
-
-          if (inputValue > 100 || inputValue < 1) {
-              alert("La quantité doit etre comprise entre 1 et 100");
-              return;
-          }
-          let itemsStr = JSON.stringify(items);
-          localStorage.setItem("object", itemsStr);
-          updateCart();          
+      items = items.map((item, index) => {
+        if (item._id === dataId && item.color === dataColor) {
+          item.quantity = inputValue;
+        }
+        return item;
       });
+
+      if (inputValue > 100 || inputValue < 1) {
+        alert("La quantité doit etre comprise entre 1 et 100");
+        return;
+      }
+      let itemsStr = JSON.stringify(items);
+      localStorage.setItem("object", itemsStr);
+      updateCart();
+    });
   });
 }
 
 // On récupère le prix de l'article suivant son id dans la l'API avec l'artId
 async function getProductPriceById(artId) {
   return fetch("http://localhost:3000/api/products/")
-      .then(function (res) {
-          return res.json();
-      })
-      .catch((err) => {
-          // Une erreur est survenue
-          console.log("erreur");
-      })
-      .then((response) => {
-          for (let i=0; i<response.length; i++)
-          {                         
-              if (response[i]._id == artId)
-              {                
-                return response[i].price;
-              }
-          }          
-      });
+    .then(function (res) {
+      return res.json();
+    })
+    .catch((err) => {
+      // Une erreur est survenue
+      console.log("erreur");
+    })
+    .then((response) => {
+      for (let i = 0; i < response.length; i++) {
+        if (response[i]._id == artId) {
+          return response[i].price;
+        }
+      }
+    });
 }
 
 
 // Suppression de l'article choisi
 function deleteItemCard() {
-  let cartItem = JSON.parse(localStorage.getItem("object")); 
+  let cartItem = JSON.parse(localStorage.getItem("object"));
   const deleteButtons = document.querySelectorAll(".deleteItem");
   deleteButtons.forEach((deleteButton) => {
-      deleteButton.addEventListener("click", (event) => {
-          event.preventDefault();
-          const deleteId = event.target.getAttribute("data-id");
-          const deleteColor = event.target.getAttribute("data-color");
-          cartItem = cartItem.filter(
-              (element) => !(element.id == deleteId && element.color == deleteColor)
-          );          
-          deleteConfirm = window.confirm(
-              "Etes vous sûr de vouloir supprimer cet article ?"
-          );
-          if (deleteConfirm == true) {
-              localStorage.setItem("object", JSON.stringify(cartItem));
-              alert("Article supprimé avec succès");
-          }
+    deleteButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      const deleteId = event.target.getAttribute("data-id");
+      const deleteColor = event.target.getAttribute("data-color");
+      cartItem = cartItem.filter(
+        (element) => !(element.id == deleteId && element.color == deleteColor)
+      );
+      deleteConfirm = window.confirm(
+        "Etes vous sûr de vouloir supprimer cet article ?"
+      );
+      if (deleteConfirm == true) {
+        localStorage.setItem("object", JSON.stringify(cartItem));
+        alert("Article supprimé avec succès");
+      }
 
-          const card = deleteButton.closest(".cart__item");
-          card.remove();    
-          updateCart();
+      const card = deleteButton.closest(".cart__item");
+      card.remove();
+      updateCart();
 
-          const deleteKanap = JSON.parse(localStorage.getItem("object"));
-          if (deleteKanap.length === 0) {
-              localStorage.removeItem("object");
-              alert('Panier vide, retour à l\'accueil.');
-              window.location.href = "index.html";
-          }
-      });
+      const deleteKanap = JSON.parse(localStorage.getItem("object"));
+      if (deleteKanap.length === 0) {
+        localStorage.removeItem("object");
+        alert('Panier vide, retour à l\'accueil.');
+        window.location.href = "index.html";
+      }
+    });
 
   });
 }
 
-// Mise à jour du panier dynamique
+
+// Fonction Recalcul du montant total du panier, lors de la modification de la quantité ou de la suppression d'un article
+
+function recalculTotalPrice() {
+  let newTotalPrice = 0;
+  //(1) On fait une boucle sur le productRegisterInLocalStorage et dans cette boucle, 
+  for (const item of cart) {
+    const idProductsLocalStorage = item.idProduct;
+    const quantityProductsLocalStorage = item.quantityProduct;
+    //(2) on vérifie si l'id correspond
+    const findProducts = mesProduits.find((element) => element._id === idProductsLocalStorage);
+    //console.log(findProducts);
+    //(3) et si c'est le cas, on récupère le prix.
+    if (findProducts) {
+      const newTotalProductPricePanier = findProducts.price * quantityProductsLocalStorage;
+      newTotalPrice += newTotalProductPricePanier;
+      console.log("Nouveau prix total panier", newTotalPrice);
+    }
+    //On affichage le nouveau prix total du panier dans le html
+    document.getElementById("totalPrice").innerHTML = newTotalPrice;
+  }
+  return
+}
+
+// console.log(ressourceArticle)
 async function updateCart() {
   let cartItem = JSON.parse(localStorage.getItem("object"));
   let totalQuantity = 0;
   let totalPrice = 0;
-  
-  for (i = 0; i < cartItem.length; i++) 
-  {      
-      let price = await getProductPriceById(cartItem[i]._id);
-      totalQuantity += parseInt(cartItem[i].qte);
-      totalPrice += parseInt(price * cartItem[i].qte);                  
+
+  for (i = 0; i < cartItem.length; i++) {
+    let price = await getProductPriceById(cartItem[i]._id);
+    totalQuantity += parseInt(cartItem[i].qte);
+    totalPrice += parseInt(price * cartItem[i].qte);
   }
-  
+
   console.log(totalPrice);
 
   document.getElementById("totalQuantity").innerHTML = totalQuantity;
   document.getElementById("totalPrice").innerHTML = totalPrice;
+  return
 }
+
+
+
+// récupérer les elements pour formulaire
+
+//Récupération des coordonnées du formulaire client et mise en variable
+let inputFirstName = document.getElementById('firstName');
+let inputLastName = document.getElementById('lastName');
+let inputAddress = document.getElementById('address');
+let inputCity = document.getElementById('city');
+let inputEmail = document.getElementById('email');
+let orderBtn = document.getElementById('order');
+// //Déclaration des variables pour vérifier la bonne valeur des champs du formulaire
+
+// // Déclarer une class avec constructor pour le formulaire
+
+let User = {
+  firstName: "",
+  lastName: "",
+  adresse: "",
+  city: "",
+  email: ""
+}
+
+// // adresser une class a l'objet
+class user {
+  constructor(firstName, lastName, adresse, city, email) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.adresse = adresse;
+    this.city = city;
+    this.email = email;
+  }
+}
+
+// // Récupération des données du user dans le local storage
+const userInstorage = JSON.parse(localStorage.getItem('user'));
+
+// function useRegex(input) {
+//   let regex = /2020-03-12T13:34:56\.123Z INFO  \[org\.example\.Class]: This is a #simple #logline containing a 'value'\./i;
+
+const userDirect = new user();
+
+inputFirstName.addEventListener('input', (e) => {
+  userDirect.firstName = e.target.value;
+});
+inputLastName.addEventListener('input', (e) => {
+  userDirect.lastName = e.target.value;
+});
+inputAddress.addEventListener('input', (e) => {
+  userDirect.adresse = e.target.value;
+});
+inputCity.addEventListener('input', (e) => {
+  userDirect.city = e.target.value;
+});
+inputEmail.addEventListener('input', (e) => {
+  userDirect.email = e.target.value;
+  return regex.test(input)
+});
+// }
+
+orderBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  localStorage.setItem('user', JSON.stringify(userDirect));
+  // preventdefault => suppression de l'event par default
+  window.location.href = 'confirmation.html';
+});
+
+// // liste erreur des champs de formulaire
+
+// let input
+// const validation = new Date().getTime()
+// console.log(validation)
