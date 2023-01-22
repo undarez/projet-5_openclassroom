@@ -40,15 +40,16 @@ async function showCart() {
 
     articles.innerHTML += article;
 
-    totalPrice.innertext = totalArticlesPrice;
-    totalQuantity.innertext = totalArticlesQuantity;
-
+    totalQuantity.innerText = totalArticlesQuantity;
+    totalPrice.innerText = totalArticlesPrice;
+    
     updateQuantity();
     deleteItemCard();
-
+    
   }
 }
 // on appelle la fonction qui rempli la page
+
 showCart();
 
 
@@ -56,7 +57,11 @@ showCart();
 // Mise à jour de la quantité de l'article
 function updateQuantity() {
   const quantityInputs = document.querySelectorAll(".itemQuantity");
-  quantityInputs.forEach((quantityInput) => {
+  console.log(quantityInputs)
+  quantityInputs.forEach(async(quantityInput) => {
+   let currentProductPrice = await getProductPriceById(quantityInput.getAttribute("data-id")).then(
+    data => data
+   )
     quantityInput.addEventListener("change", (event) => {
       event.preventDefault();
       const inputValue = event.target.value;
@@ -64,7 +69,17 @@ function updateQuantity() {
       const dataColor = event.target.getAttribute("data-color");
       let cartItems = localStorage.getItem("object");
       let items = JSON.parse(cartItems);
+      let newQuantity = 0;
+      let newPrice = 0;
+      newQuantity += parseInt(inputValue);
+            totalQuantity.innerText = newQuantity;
+      newPrice += parseInt(currentProductPrice * newQuantity)
+      totalPrice.innerText = newPrice;
+      
 
+      //   console.log(totalPrice);
+
+// console.log(inputValue)
       items = items.map((item, index) => {
         if (item._id === dataId && item.color === dataColor) {
           item.quantity = inputValue;
@@ -78,7 +93,7 @@ function updateQuantity() {
       }
       let itemsStr = JSON.stringify(items);
       localStorage.setItem("object", itemsStr);
-      updateCart();
+      // updateCart();
     });
   });
 }
@@ -125,7 +140,7 @@ function deleteItemCard() {
 
       const card = deleteButton.closest(".cart__item");
       card.remove();
-      updateCart();
+      // updateCart();
 
       const deleteKanap = JSON.parse(localStorage.getItem("object"));
       if (deleteKanap.length === 0) {
@@ -161,26 +176,6 @@ function recalculTotalPrice() {
   }
   return
 }
-
-// console.log(ressourceArticle)
-async function updateCart() {
-  let cartItem = JSON.parse(localStorage.getItem("object"));
-  let totalQuantity = 0;
-  let totalPrice = 0;
-
-  for (i = 0; i < cartItem.length; i++) {
-    let price = await getProductPriceById(cartItem[i]._id);
-    totalQuantity += parseInt(cartItem[i].qte);
-    totalPrice += parseInt(price * cartItem[i].qte);
-  }
-
-  console.log(totalPrice);
-
-  document.getElementById("totalQuantity").innerHTML = totalQuantity;
-  document.getElementById("totalPrice").innerHTML = totalPrice;
-  return
-}
-
 
 
 // récupérer les elements pour formulaire
@@ -218,8 +213,14 @@ class user {
 // // Récupération des données du user dans le local storage
 const userInstorage = JSON.parse(localStorage.getItem('user'));
 
-// function useRegex(input) {
-//   let regex = /2020-03-12T13:34:56\.123Z INFO  \[org\.example\.Class]: This is a #simple #logline containing a 'value'\./i;
+
+// on efface le contenue du localStorage
+const ClearCart = () => {
+   // Suppression des informations de panier stockées dans localStorage
+  document.querySelectorAll(".deleteItem").addEventListener('clik',()=>{
+    console.log(ClearCart)
+  })
+}
 
 const userDirect = new user();
 
@@ -237,19 +238,17 @@ inputCity.addEventListener('input', (e) => {
 });
 inputEmail.addEventListener('input', (e) => {
   userDirect.email = e.target.value;
-  return regex.test(input)
 });
-// }
+
 
 orderBtn.addEventListener('click', (e) => {
   e.preventDefault();
   localStorage.setItem('user', JSON.stringify(userDirect));
   // preventdefault => suppression de l'event par default
+  window.localStorage.removeItem('object')
   window.location.href = 'confirmation.html';
+  ClearCart()
 });
 
-// // liste erreur des champs de formulaire
 
-// let input
-// const validation = new Date().getTime()
-// console.log(validation)
+

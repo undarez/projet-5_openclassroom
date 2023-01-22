@@ -61,12 +61,12 @@ function choixQte() {
 // Rendu du produit sur la page produit
 const renderProduct = async (currentProduct) => {
   await getCanapeId();
-  containerh1.innerHTML = currentProduct.name;
-  containerprice.innerHTML = currentProduct.price.toString();
-  containerdesc.innerHTML = currentProduct.description;
-  containerImg.innerHTML = `<img src="${currentProduct.imageUrl}" alt="${currentProduct.name}">`;
+  containerh1.innerText = currentProduct.name;
+  containerprice.innerText = currentProduct.price.toString();
+  containerdesc.innerText = currentProduct.description;
+  containerImg.innerText = `<img src="${currentProduct.imageUrl}" alt="${currentProduct.name}">`;
   currentProduct?.colors?.map((color) => {
-    containercolor.innerHTML += `<option value="${color}">${color}</option>`;
+    containercolor.innerText += `<option value="${color}">${color}</option>`;
   });
 };
 renderProduct(article);
