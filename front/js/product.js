@@ -40,7 +40,7 @@ let color = document.getElementById("colors");
 function choixColors() {
   // || = ou logique pipe
   // if = color === veux dire est égale la couleur choisis , puis le === null est égal à vide donc une alert en envoyer pour indiquer qu'il faut choisir une couleur obligatoire pour valider le panier.
-  if (color.value === "" || color.value === null) {
+  if (containercolor.value === "" || containercolor.value === null) {
     alert("veuillez choisir une couleur");
     return
   }
@@ -73,67 +73,67 @@ renderProduct();
 
 
 // articleTab est un tableau qui contien les articles du panier
-const articleTab = []
-const inlocalStorage = JSON.parse(localStorage.getItem("object"))
+// const articleTab = []
 // const inlocalStorage = JSON.parse(localStorage.getItem("object"))
+// // const inlocalStorage = JSON.parse(localStorage.getItem("object"))
 
-// creer une function addToCart qui ajout le produit au panier
-// creer une function click qui au clique sur le bouton ajout le produit
-// rectification lier le click au Addtocart
+// // creer une function addToCart qui ajout le produit au panier
+// // creer une function click qui au clique sur le bouton ajout le produit
+// // rectification lier le click au Addtocart
 // containerAddToCart.addEventListener('click', function () {
   // choixColors();choixQte(); appel des fonction pour quelle soit dans le addtoCart donc le panier apres validation du bouton .
 
-  choixColors();
-  choixQte();
-  addToCart.addEventListener('click', () => {
-    let articlePanier = {
-      _id: article._id,
-      description: article.description,
-      name: article.name,
-      // ici ont supprimme le article.price pour pas que l'utilisateur mal aviser modifie le prix
-      // price : article.price,
-      imageUrl: article.imageUrl,
-      altTxt: article.altTxt,
-      color: color.value,
-      qte: Number(qte.value)
-    }
   
-  
-    // ici la condition articleTab.length indique que si le panier est égal a 0 dans ce cas on push le nouvel article dans le panier qui est copier
-    if (inlocalStorage) {
-      const productInCart = inlocalStorage.find((product) => product._id === articlePanier._id && product.color === articlePanier.color);
-      if (productInCart) {
-        productInCart.color = color
-        productInCart.qte += articlePanier.qte;
-  
-        articleTab.push(...inlocalStorage, articlePanier)
-        for (let item of inlocalStorage) {
-          if (item._id === articlePanier._id && item.color === articlePanier.color) {
-            articlePanier.qte += item.qte
-            articleTab.push(articlePanier, ...inlocalStorage.filter((product) => product._id !== articlePanier._id));
-            // articleTab.push (...inlocalStorage, articlePanier)
-          }
-        }
-  
-      } else {
-        articleTab.push(articlePanier)
-      }
-  
-  
-  
-  
-      // ici ont demande a articleTab de pousser le tableau qui contien les donner
-  
-      console.log(articlePanier)
-      window.localStorage.setItem("object", JSON.stringify(articleTab))
-  
-      // let inObject = window.localStorage.getItem('object');
-      // return (inObject);
-      window.location.href = "cart.html"
-    }
+  let articlePanier = {
+    _id: article._id,
+    description: article.description,
+    name: article.name,
+    // ici ont supprimme le article.price pour pas que l'utilisateur mal aviser modifie le prix
+    // price : article.price,
+    imageUrl: article.imageUrl,
+    altTxt: article.altTxt,
+    color: containercolor.value,
+    qte: Number(qte.value)
   }
+  
+  // articleTab est un tableau qui contien les articles du panier
+  const articleTab = []
+  const inlocalStorage = JSON.parse(localStorage.getItem("object"))
+ 
+  
+addToCart.addEventListener('click', () => {
+            choixColors();
+            choixQte();
+            let articlePanier = {
+              _id: article._id,
+              description: article.description,
+              name: article.name,
+              // ici ont supprimme le article.price pour pas que l'utilisateur mal aviser modifie le prix
+              // price : article.price,
+              imageUrl: article.imageUrl,
+              altTxt: article.altTxt,
+              color: containercolor.value,
+              qte: Number(qte.value)
+            };
+            if(inlocalStorage) {
+              const productInCart = inlocalStorage.find((product) => product._id === articlePanier._id && product.color === articlePanier.color);
+              if(productInCart) {
+                productInCart.color = containercolor.value
+                  productInCart.qte += articlePanier.qte;
+                  articleTab.push(productInCart, ...inlocalStorage.filter((product) => product._id !== articlePanier._id));
+              } else {
+                  articleTab.push(...inlocalStorage, articlePanier);
+              }
+            } else {
+              articleTab.push(articlePanier);
+          }  
 
-  );
 
-// }
+    window.localStorage.setItem('object', JSON.stringify(articleTab));
+    window.location.href = 'cart.html';
+  }
+  )
+  
+  
+  
 

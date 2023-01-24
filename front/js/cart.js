@@ -24,7 +24,7 @@ async function showCart() {
                     <div class="cart__item__content__description">
                       <h2>${cart[i].name}</h2>
                       <p>${cart[i].color}</p>
-                      <p>${cart[i].price} €</p>
+                      <p>${price} €</p>
                     </div>
                     <div class="cart__item__content__settings">
                       <div class="cart__item__content__settings__quantity">
@@ -103,7 +103,6 @@ function updateQuantity() {
 // On récupère le prix de l'article suivant son id dans la l'API avec l'artId
 async function getProductPriceById(artId) {
   return fetch("http://localhost:3000/api/products/")
-  // return fetch(`"http://localhost:3000/api/products/${artId}"`)
     .then(function (res) {
       return res.json();
     })
