@@ -13,12 +13,6 @@ async function getCanapes() {
             // quand nous faison un return dans un then dans ce cas on peux l'appeler dans le prochain then
             return contenuArticleResponse.json()
         })
-        .then((canapes) => {
-            // le console.log canapes permet de visualiser dans le terminal si la function return bien la liste des canapes
-            // console.log(canapes)
-            return canapes
-        })
-
         // creer un catch qui return un message d'alert si l'api ne fonctionne pas 
         .catch((error) => {
             alert(error, "l'API est hors-ligne")
@@ -53,15 +47,7 @@ async function displayCanapes() {
     // canapeClone permet de prendre l'id de la section et de la cloner
     // la declaration du document avec le appenchild nouvel enfant permet de rajouter un article a cloner
     // console.log(section)
-    return canapes
+    
 }
 displayCanapes()
 
-const str = "http://127.0.0.1:5501/front/html/product.html?id=42";
-const url = new URL(str);
-const id = url.searchParams.get("id");
-function resultat (canape) {
-    return canape._id === _id
-}
-// console.log(resultat)
-// // console.log(id);

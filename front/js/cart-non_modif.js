@@ -87,8 +87,6 @@ function updateQuantity() {
         return item;
       });
 
-      
-
       if (inputValue > 100 || inputValue < 1) {
         alert("La quantité doit etre comprise entre 1 et 100");
         return;
@@ -102,8 +100,7 @@ function updateQuantity() {
 
 // On récupère le prix de l'article suivant son id dans la l'API avec l'artId
 async function getProductPriceById(artId) {
-  return fetch("http://localhost:3000/api/products/")
-  // return fetch(`"http://localhost:3000/api/products/${artId}"`)
+  return fetch(`"http://localhost:3000/api/products/${artId}"`)
     .then(function (res) {
       return res.json();
     })

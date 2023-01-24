@@ -44,77 +44,96 @@ function choixColors() {
     alert("veuillez choisir une couleur");
     return
   }
-  
+
 }
 
 // choix qte = fonction qui renseigne dans le panier la quantité choisi par l'utilisateur.
 let qte = document.getElementById("quantity");
 function choixQte() {
   // création d'une variable qui indique la class qui remonte la quantité , qte.value cible la valeur inferireur a 1 ou null dans ce cas une alerte ce déclanche.
-  if (qte.value <1 || qte.value === null ) {
+  if (qte.value < 1 || qte.value === null) {
     alert("veuillez choisir une quantité");
     return;
   }
-  
+
 }
 
 // Rendu du produit sur la page produit
-const renderProduct = async (currentProduct) => {
+const renderProduct = async () => {
   await getCanapeId();
-  containerh1.innerText = currentProduct.name;
-  containerprice.innerText = currentProduct.price.toString();
-  containerdesc.innerText = currentProduct.description;
-  containerImg.innerText = `<img src="${currentProduct.imageUrl}" alt="${currentProduct.name}">`;
-  currentProduct?.colors?.map((color) => {
-    containercolor.innerText += `<option value="${color}">${color}</option>`;
+  containerh1.innerText = article.name;
+  containerprice.innerText = article.price.toString();
+  containerdesc.innerText = article.description;
+  containerImg.innerHTML = `<img src="${article.imageUrl}" alt="${article.name}">`;
+  article?.colors?.map((color) => {
+    containercolor.innerHTML += `<option value="${color}">${color}</option>`;
   });
 };
-renderProduct(article);
+renderProduct();
 
 
 // articleTab est un tableau qui contien les articles du panier
 const articleTab = []
-const inlocalStorage = JSON.parse (localStorage.getItem("object"))
+const inlocalStorage = JSON.parse(localStorage.getItem("object"))
 // const inlocalStorage = JSON.parse(localStorage.getItem("object"))
 
 // creer une function addToCart qui ajout le produit au panier
 // creer une function click qui au clique sur le bouton ajout le produit
 // rectification lier le click au Addtocart
-containerAddToCart.addEventListener('click', function () {
+// containerAddToCart.addEventListener('click', function () {
   // choixColors();choixQte(); appel des fonction pour quelle soit dans le addtoCart donc le panier apres validation du bouton .
+
   choixColors();
   choixQte();
+  addToCart.addEventListener('click', () => {
+    let articlePanier = {
+      _id: article._id,
+      description: article.description,
+      name: article.name,
+      // ici ont supprimme le article.price pour pas que l'utilisateur mal aviser modifie le prix
+      // price : article.price,
+      imageUrl: article.imageUrl,
+      altTxt: article.altTxt,
+      color: color.value,
+      qte: Number(qte.value)
+    }
   
-  let articlePanier = {
-    _id : article._id,
-    description : article.description,
-    name : article.name,
-    price : article.price,
-    imageUrl : article.imageUrl,
-    altTxt : article.altTxt,
-    color : color.value,
-    qte : Number(qte.value)  
+  
+    // ici la condition articleTab.length indique que si le panier est égal a 0 dans ce cas on push le nouvel article dans le panier qui est copier
+    if (inlocalStorage) {
+      const productInCart = inlocalStorage.find((product) => product._id === articlePanier._id && product.color === articlePanier.color);
+      if (productInCart) {
+        productInCart.color = color
+        productInCart.qte += articlePanier.qte;
+  
+        articleTab.push(...inlocalStorage, articlePanier)
+        for (let item of inlocalStorage) {
+          if (item._id === articlePanier._id && item.color === articlePanier.color) {
+            articlePanier.qte += item.qte
+            articleTab.push(articlePanier, ...inlocalStorage.filter((product) => product._id !== articlePanier._id));
+            // articleTab.push (...inlocalStorage, articlePanier)
+          }
+        }
+  
+      } else {
+        articleTab.push(articlePanier)
+      }
+  
+  
+  
+  
+      // ici ont demande a articleTab de pousser le tableau qui contien les donner
+  
+      console.log(articlePanier)
+      window.localStorage.setItem("object", JSON.stringify(articleTab))
+  
+      // let inObject = window.localStorage.getItem('object');
+      // return (inObject);
+      window.location.href = "cart.html"
+    }
   }
 
+  );
 
-  // ici la condition articleTab.length indique que si le panier est égal a 0 dans ce cas on push le nouvel article dans le panier qui est copier
-  if(inlocalStorage) {
-    articleTab.push (...inlocalStorage, articlePanier)
-  
-  }else{
-    articleTab.push(articlePanier)
-  }
-
-
-
-
-    // ici ont demande a articleTab de pousser le tableau qui contien les donner
-    
-    console.log(articlePanier)
-    window.localStorage.setItem("object", JSON.stringify(articleTab))
-    
-    // let inObject = window.localStorage.getItem('object');
-    // return (inObject);
-  window.location.href = "cart.html"
-});
+// }
 
