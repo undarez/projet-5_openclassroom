@@ -15,7 +15,7 @@ async function showCart() {
 
     totalArticlesQuantity += parseInt(cart[i].qte);
     totalArticlesPrice += parseInt(cart[i].qte * price);
-
+// ici ont ajoute tous les elements d'affichage de l'api pour que cela fonctionne qui appartienne au locale storage
     let article = `<article class="cart__item" data-id="${cart[i]._id}" data-color="${cart[i].color}">
                   <div class="cart__item__img">
                     <img src="${cart[i].imageUrl}" alt="${cart[i].altTxt}">
@@ -39,7 +39,7 @@ async function showCart() {
                 </article>`;
 
     articles.innerHTML += article;
-
+// les deux ligne suivante permet de faire l'affichage sur le site donc envoyer du contenue html
     totalQuantity.innerText = totalArticlesQuantity;
     totalPrice.innerText = totalArticlesPrice;
     
@@ -80,6 +80,8 @@ function updateQuantity() {
       //   console.log(totalPrice);
 
 // console.log(inputValue)
+
+// ci ont creer un map donc qui crée un tableau pour récupérer les elements sans supprimer ce qui y a a l'interieur
       items = items.map((item, index) => {
         if (item._id === dataId && item.color === dataColor) {
           item.quantity = inputValue;
