@@ -267,14 +267,14 @@ Order.addEventListener('submit', async (event) => {
   event.preventDefault()
 
   if (Object.keys(userDirect).every((object) => Validate(object, Order.querySelector(`[name="${object}"]`)))) {
-    // const data = await userDirect.order(
+    const data = await userDirect.order(
       {
         firstName: userDirect.querySelector('[name="firstName"]').value,
         lastName: userDirect.querySelector('[name="lastName"]').value,
         address: userDirect.querySelector('[name="address"]').value,
         city: userDirect.querySelector('[name="city"]').value,
         email: userDirect.querySelector('[name="email"]').value
-      }
+      })
 
     orderBtn.addEventListener('click', (e) => {
       e.preventDefault();
