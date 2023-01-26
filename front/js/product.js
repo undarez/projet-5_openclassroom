@@ -18,6 +18,8 @@ const url = `http://localhost:3000/api/products/${id}`;
 const article = {}
 
 
+
+
 // la function getCanapeId est une fonction temporaire qui indique l'appel des éléments obligatoire de l'article exemple : article.name = data.name le data.name nous indique le nom de l'article renseigner sur la page Product.js qui a tous les renseignements de chaque article.
 async function getCanapeId() {
   await fetch(url)
@@ -84,21 +86,9 @@ renderProduct();
   // choixColors();choixQte(); appel des fonction pour quelle soit dans le addtoCart donc le panier apres validation du bouton .
 
   
-  let articlePanier = {
-    _id: article._id,
-    description: article.description,
-    name: article.name,
-    // ici ont supprimme le article.price pour pas que l'utilisateur mal aviser modifie le prix
-    // price : article.price,
-    imageUrl: article.imageUrl,
-    altTxt: article.altTxt,
-    color: containercolor.value,
-    qte: Number(qte.value)
-  }
-  
   // articleTab est un tableau qui contien les articles du panier
   const articleTab = []
-  const inlocalStorage = JSON.parse(localStorage.getItem("object"))
+  const inlocalStorage = JSON.parse(localStorage.getItem("cart"))
  
   
 addToCart.addEventListener('click', () => {
@@ -128,8 +118,7 @@ addToCart.addEventListener('click', () => {
               articleTab.push(articlePanier);
           }  
 
-
-    window.localStorage.setItem('object', JSON.stringify(articleTab));
+    window.localStorage.setItem('cart', JSON.stringify(articleTab));
     window.location.href = 'cart.html';
   }
   )

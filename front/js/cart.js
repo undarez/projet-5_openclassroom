@@ -1,6 +1,6 @@
 
 
-let cart = JSON.parse(localStorage.getItem("object"));
+let cart = JSON.parse(localStorage.getItem("cart"));
 
 let articles = document.querySelector("#cart__items");
 let totalPrice = document.querySelector("#totalPrice");
@@ -15,73 +15,74 @@ async function showCart() {
 
     totalArticlesQuantity += parseInt(cart[i].qte);
     totalArticlesPrice += parseInt(cart[i].qte * price);
-// ici ont ajoute tous les elements d'affichage de l'api pour que cela fonctionne qui appartienne au locale storage
+    // ici ont ajoute tous les elements d'affichage de l'api pour que cela fonctionne qui appartienne au locale storage
     let article = `<article class="cart__item" data-id="${cart[i]._id}" data-color="${cart[i].color}">
-                  <div class="cart__item__img">
-                    <img src="${cart[i].imageUrl}" alt="${cart[i].altTxt}">
-                  </div>
-                  <div class="cart__item__content">
-                    <div class="cart__item__content__description">
+    <div class="cart__item__img">
+    <img src="${cart[i].imageUrl}" alt="${cart[i].altTxt}">
+    </div>
+    <div class="cart__item__content">
+    <div class="cart__item__content__description">
                       <h2>${cart[i].name}</h2>
                       <p>${cart[i].color}</p>
                       <p>${price} €</p>
                     </div>
                     <div class="cart__item__content__settings">
-                      <div class="cart__item__content__settings__quantity">
-                        <p>Qté : ${cart[i].qte} </p>
-                        <input  data-id="${cart[i]._id}" data-color="${cart[i].color}" type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${cart[i].qte}">
-                      </div>
-                      <div class="cart__item__content__settings__delete">
-                        <p  data-id="${cart[i]._id}" data-color="${cart[i].color}" class="deleteItem">Supprimer</p>
-                      </div>
+                    <div class="cart__item__content__settings__quantity">
+                    <p>Qté : ${cart[i].qte} </p>
+                    <input  data-id="${cart[i]._id}" data-color="${cart[i].color}" type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${cart[i].qte}">
                     </div>
-                  </div>
-                </article>`;
+                    <div class="cart__item__content__settings__delete">
+                    <p  data-id="${cart[i]._id}" data-color="${cart[i].color}" class="deleteItem">Supprimer</p>
+                    </div>
+                    </div>
+                    </div>
+                    </article>`;
 
     articles.innerHTML += article;
-// les deux ligne suivante permet de faire l'affichage sur le site donc envoyer du contenue html
+    // les deux ligne suivante permet de faire l'affichage sur le site donc envoyer du contenue html
     totalQuantity.innerText = totalArticlesQuantity;
     totalPrice.innerText = totalArticlesPrice;
-    
-    updateQuantity();
-    deleteItemCard();
-    
+
+
+
   }
+  updateQuantity();
+  deleteItemCard();
+
 }
 // on appelle la fonction qui rempli la page
 
 showCart();
 
 
-
 // Mise à jour de la quantité de l'article
 function updateQuantity() {
   const quantityInputs = document.querySelectorAll(".itemQuantity");
   console.log(quantityInputs)
-  quantityInputs.forEach(async(quantityInput) => {
-   let currentProductPrice = await getProductPriceById(quantityInput.getAttribute("data-id")).then(
-    data => data
-   )
+  quantityInputs.forEach(async (quantityInput) => {
+    let currentProductPrice = await getProductPriceById(quantityInput.getAttribute("data-id")).then(
+      data => data
+    )
     quantityInput.addEventListener("change", (event) => {
       event.preventDefault();
       const inputValue = event.target.value;
       const dataId = event.target.getAttribute("data-id");
       const dataColor = event.target.getAttribute("data-color");
-      let cartItems = localStorage.getItem("object");
+      let cartItems = localStorage.getItem("cart");
       let items = JSON.parse(cartItems);
       let newQuantity = 0;
       let newPrice = 0;
       newQuantity += parseInt(inputValue);
-            totalQuantity.innerText = newQuantity;
+      totalQuantity.innerText = newQuantity;
       newPrice += parseInt(currentProductPrice * newQuantity)
       totalPrice.innerText = newPrice;
-      
+
 
       //   console.log(totalPrice);
 
-// console.log(inputValue)
+      // console.log(inputValue)
 
-// ci ont creer un map donc qui crée un tableau pour récupérer les elements sans supprimer ce qui y a a l'interieur
+      // ci ont creer un map donc qui crée un tableau pour récupérer les elements sans supprimer ce qui y a a l'interieur
       items = items.map((item, index) => {
         if (item._id === dataId && item.color === dataColor) {
           item.quantity = inputValue;
@@ -89,7 +90,7 @@ function updateQuantity() {
         return item;
       });
 
-      
+
 
       if (inputValue > 100 || inputValue < 1) {
         alert("La quantité doit etre comprise entre 1 et 100");
@@ -138,7 +139,7 @@ function deleteItemCard() {
         "Etes vous sûr de vouloir supprimer cet article ?"
       );
       if (deleteConfirm == true) {
-        localStorage.setItem("object", JSON.stringify(cartItem));
+        localStorage.setItem("cart", JSON.stringify(cartItem));
         alert("Article supprimé avec succès");
       }
 
@@ -146,39 +147,15 @@ function deleteItemCard() {
       card.remove();
       // updateCart();
 
-      const deleteKanap = JSON.parse(localStorage.getItem("object"));
+      const deleteKanap = JSON.parse(localStorage.getItem("cart"));
       if (deleteKanap.length === 0) {
-        localStorage.removeItem("object");
+        localStorage.removeItem("cart");
         alert('Panier vide, retour à l\'accueil.');
         window.location.href = "index.html";
       }
     });
 
   });
-}
-
-
-// Fonction Recalcul du montant total du panier, lors de la modification de la quantité ou de la suppression d'un article
-
-function recalculTotalPrice() {
-  let newTotalPrice = 0;
-  //(1) On fait une boucle sur le productRegisterInLocalStorage et dans cette boucle, 
-  for (const item of cart) {
-    const idProductsLocalStorage = item.idProduct;
-    const quantityProductsLocalStorage = item.quantityProduct;
-    //(2) on vérifie si l'id correspond
-    const findProducts = mesProduits.find((element) => element._id === idProductsLocalStorage);
-    //console.log(findProducts);
-    //(3) et si c'est le cas, on récupère le prix.
-    if (findProducts) {
-      const newTotalProductPricePanier = findProducts.price * quantityProductsLocalStorage;
-      newTotalPrice += newTotalProductPricePanier;
-      console.log("Nouveau prix total panier", newTotalPrice);
-    }
-    //On affichage le nouveau prix total du panier dans le html
-    document.getElementById("totalPrice").innerHTML = newTotalPrice;
-  }
-  return
 }
 
 
@@ -220,8 +197,8 @@ const userInstorage = JSON.parse(localStorage.getItem('user'));
 
 // on efface le contenue du localStorage
 const ClearCart = () => {
-   // Suppression des informations de panier stockées dans localStorage
-  document.querySelectorAll(".deleteItem").addEventListener('clik',()=>{
+  // Suppression des informations de panier stockées dans localStorage
+  document.querySelectorAll(".deleteItem").addEventListener('clik', () => {
     console.log(ClearCart)
   })
 }
@@ -244,16 +221,77 @@ inputEmail.addEventListener('input', (e) => {
   userDirect.email = e.target.value;
 });
 
+const Validate = (object, input) => {
+  const error = form.querySelector(`#${object}ErrorMsg`)
+  error.textContent = ''
+  return userDirect[object].every((constraint) => {
+    if (!constraint.test(input.value)) {
+      error.textContent += constraint.message
+      return false
+    }
+    return true
+  })
+}
 
-orderBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  localStorage.setItem('user', JSON.stringify(userDirect));
-  // preventdefault => suppression de l'event par default
-  // window.localStorage.removeItem('object')
-  window.localStorage.clear()
-  window.location.href = 'confirmation.html';
-  ClearCart()
-});
+// declaration d'un fetch pour utiliser orderId pour generer un id de commande
+const Order = document.querySelector(".cart__order__form")
+async function postOrder(url, data = {}) {
+  const response = await fetch(url, {
+    method: 'POST',
+    Headers: {
+      // les trois ligne indique que le fetch accpete l'application json
+      "content/type": "application/json",
+      "cache": "*default"
+    },
+    body: JSON.stringify(data)
+  })
+  // si a l'ouverture de l'api c'est bon donc return 200
+  if (response.ok === true) {
+    return response.json();
+  }
+  throw new error("Impossible de contacter le serveur")
+
+}
+// une boucle for pour aller chercher dans userdirect tous les name qui sont dans le formulaire sur le html de cart.html puis ont lui demande une validation a chaque ajout dans le formulaire par lutilisateur
+for (const object in userDirect) {
+  const input = Order.querySelector(`[name="${object}]`)
+  input.addEventListener("change", (event) => {
+    Validate(object, input)
+  })
+
+}
+
+// submit= faire parvenir donc ont demande de faire parvenir la liste du formulaire nommer order apres le retour de la reponse async
+// avec une suppression par default des event default
+Order.addEventListener('submit', async (event) => {
+  event.preventDefault()
+
+  if (Object.keys(userDirect).every((object) => Validate(object, Order.querySelector(`[name="${object}"]`)))) {
+    // const data = await userDirect.order(
+      {
+        firstName: userDirect.querySelector('[name="firstName"]').value,
+        lastName: userDirect.querySelector('[name="lastName"]').value,
+        address: userDirect.querySelector('[name="address"]').value,
+        city: userDirect.querySelector('[name="city"]').value,
+        email: userDirect.querySelector('[name="email"]').value
+      }
+
+    orderBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.setItem('user', JSON.stringify(userDirect));
+      // preventdefault => suppression de l'event par default
+      // window.localStorage.removeItem('object')
+      window.localStorage.clear()
+      window.location.href = 'confirmation.html';
+      ClearCart()
+      postOrder(`http://localhost:3000/api/products/order=${data.orderId}`)
+    });
+  }
+
+
+
+})
+
 
 
 
