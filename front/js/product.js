@@ -75,16 +75,6 @@ renderProduct();
 
 
 // articleTab est un tableau qui contien les articles du panier
-// const articleTab = []
-// const inlocalStorage = JSON.parse(localStorage.getItem("object"))
-// // const inlocalStorage = JSON.parse(localStorage.getItem("object"))
-
-// // creer une function addToCart qui ajout le produit au panier
-// // creer une function click qui au clique sur le bouton ajout le produit
-// // rectification lier le click au Addtocart
-// containerAddToCart.addEventListener('click', function () {
-  // choixColors();choixQte(); appel des fonction pour quelle soit dans le addtoCart donc le panier apres validation du bouton .
-
   
   // articleTab est un tableau qui contien les articles du panier
   const articleTab = []
