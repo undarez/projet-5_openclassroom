@@ -49,7 +49,7 @@ async function showCart() {
   deleteItemCard();
 
 }
-// on appelle la fonction qui rempli la page
+// on appelle la fonction qui rempli la page showCart
 
 showCart();
 
@@ -62,6 +62,7 @@ function updateQuantity() {
     let currentProductPrice = await getProductPriceById(quantityInput.getAttribute("data-id")).then(
       data => data
     )
+    // ajout de l'event change pour permettre à l'utilisateur de changer la quantité au cas ou il est oublier un article.
     quantityInput.addEventListener("change", (event) => {
       event.preventDefault();
       const inputValue = event.target.value;
@@ -71,15 +72,11 @@ function updateQuantity() {
       let items = JSON.parse(cartItems);
       let newQuantity = 0;
       let newPrice = 0;
+      // parseInt permet de transformer la quantité en objet
       newQuantity += parseInt(inputValue);
       totalQuantity.innerText = newQuantity;
       newPrice += parseInt(currentProductPrice * newQuantity)
       totalPrice.innerText = newPrice;
-
-
-      //   console.log(totalPrice);
-
-      // console.log(inputValue)
 
       // ci ont creer un map donc qui crée un tableau pour récupérer les elements sans supprimer ce qui y a a l'interieur
       items = items.map((item, index) => {
@@ -122,224 +119,216 @@ async function getProductPriceById(artId) {
 
 // Suppression de l'article choisi
 function deleteItemCard() {
-  let cartItem = JSON.parse(localStorage.getItem("cart"));
-  const deleteButtons = document.querySelectorAll(".deleteItem");
-  deleteButtons.forEach((deleteButton) => {
-    deleteButton.addEventListener("click", (event) => {
-      event.preventDefault();
-      const deleteId = event.target.getAttribute("data-id");
-      const deleteColor = event.target.getAttribute("data-color");
-      cartItem = cartItem.filter(
-        (element) => !(element.id == deleteId && element.color == deleteColor)
-      );
-      deleteConfirm = window.confirm(
+// j'appel l'ID qui contien le bouton deleteItem qui permet de supprimer les articles du panier en le transformant en tableau ce qui permet d'ajouter les articles à supprimer dans ce tableau.
+
+  let deleteButtons = Array.from(document.querySelectorAll(".deleteItem"));
+  let articleSuppr = [];
+  // boucle for pour chaque article du tableau deleteButton 
+  for (let i = 0; i < deleteButtons.length; i++) {
+    deleteButtons[i].addEventListener("click", () => {
+      // parentElement.style.display permet de rendre invisible l'element selectionner avec le bouuton delete
+      deleteButtons[i].parentElement.style.display = "none"
+
+      // Copie du tableau cart dans le tableau articleSuppr
+      articleSuppr = cart
+
+      // j'ajoute une demande de confirmation de suppression d'article au cas ou le client est fait une mauvaise manip
+
+      deleteComfirm = window.confirm(
         "Etes vous sûr de vouloir supprimer cet article ?"
       );
-      if (deleteConfirm == true) {
-        localStorage.setItem("cart", JSON.stringify(cartItem));
-        alert("Article supprimé avec succès");
+      if (deleteComfirm == true){
+        // Array.prototype.splice() supprime un élément à chaque index [i] du tableau écouté
+        articleSuppr.splice([i], 1)
+  //  je récupere l'article qui est stoker dans le local storage pour le transformer en chaine de caractere grace a stringify.
+        cart = localStorage.setItem("cart", JSON.stringify(articleSuppr))
+        alert("article supprimé avec succès")
+
       }
 
-      const card = deleteButton.closest(".cart__item");
-      card.remove();
-      updateCart();
-    });
-
-  });
+      // j'actualise la page apres la suppression de l'article du panier 
+      window.location.href = `http://127.0.0.1:5501/front/html/cart.html`
+    })
+  }
 }
 
 
+
+// Sacré formulaire
+
+const  btnCommander = document.getElementById("order")
+
+// validation du formulaire avec les regex puis requette serveru pour la validation
+// les regex afficher permette d'etre utiliser dans le formulaire
+// j'appel les id qui gere les erreurs du formulaire 
+
+const validationForm = {
+  firstName : {
+    Element: document.getElementById("firstName"),
+    regex: /^[^\d]*$/, 
+    errorMSg: "Prénom invalide"
+  },
+  lastName : {
+    Element: document.getElementById("lastName"),
+    regex: /^.*(\s(\B#([a-z]{2,})(?!|[?.,]*\w)\s)+).*$/, 
+    errorMSg: "nom invalide"
+  },
+  address : {
+    Element: document.getElementById("address"),
+    regex: /^([A-Za-z0-9]+[\s]?)+$/, 
+    errorMSg: "adresse invalide"
+  },
+  city : {
+    Element: document.getElementById("city"),
+    regex: /^.*(\s(\B#([a-z]{2,})(?!=*\w)\s)+).*$/,
+    errorMSg: "ville invalide"
+  },
+  email : {
+    Element: document.getElementById("email"),
+    regex: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+    errorMSg: "email invalide"
+  },
+  
+}
+
+
+// // je verifie avec cette fonction si les valeur de l'input son autoriser
+// puis je regroupe tous ce qui a été déclarer .
+// puis ifRegexValid sert a regrouper toute les const qui vont etre vérifier en une fois
+function checkvalidinput (input){
+  const element = input.Element
+  const regex = input.regex
+  const errorMsg = input.errorMsg
+  const errorTxt = input.Element.nextElementSibling
+  const ifRegexValid = regex.test(element.value)
+  if (ifRegexValid){
+    errorTxt.innerText = errorMsg
+  }else{
+    errorTxt.innerText = ''
+  }
+  return ifRegexValid
+}
+
+
+// ajout d'un event pour récupérer la valeur des information de l'utilisateur sur l'objet contact qui est lui meme appeler 
+btnCommander.addEventListener("click",(e)=>{
+  e.preventDefault();
+  let contact = {
+    firstName: inputFirstName.value,
+    lastName: inputLastName.value,
+    adress:  inputAddress.value,
+    city:  inputCity.value,
+    email:  inputEmail.value
+  }
+  // on vérifie si le panier n'est pas vide 
+  // si il ya pas de qte ou que la qte est egal à zéro alors une alert previens que le panier est vide
+  if (cart == null || cart.length == 0){
+    alert("votre panier est vide veuillez au minimun ajouté une quantité de 1")
+  }
+  else if(
+    checkvalidinput(validationForm.firstName) == false &&
+    checkvalidinput(validationForm.lastName) == false &&
+    checkvalidinput(validationForm.address) == false &&
+    checkvalidinput(validationForm.city) == false &&
+    checkvalidinput(validationForm.email) == false 
+  ){
+    alert("le formulaire n'est pas correct ou imcomplet veuillez verifier SVP!")
+  }else{
+    // j'enregistre le formulaire dans le localstorage
+    // contact correspond a l'objet qui contient les valeur de nom, prenom, city, adress, email
+    localStorage.setItem("contact", JSON.stringify(contact))
+  }
+})
+
 // récupérer les elements pour formulaire
 
-//Récupération des coordonnées du formulaire client et mise en variable
+// ajout d'un event change qui indique quand l'utilisateur change des donner et vérifie si un caractèere qui n'est pas autoriser est utiliser ou pas.
 let inputFirstName = document.getElementById('firstName');
+inputFirstName.addEventListener("change",()=>checkvalidinput(validationForm.firstName))//.Element,
+  //validationForm.firstName.regex));
 let inputLastName = document.getElementById('lastName');
+inputLastName.addEventListener("change",()=>checkvalidinput(validationForm.lastName));
 let inputAddress = document.getElementById('address');
+address.addEventListener("change",()=>checkvalidinput(validationForm.address));
 let inputCity = document.getElementById('city');
+inputCity.addEventListener("change",()=>checkvalidinput(validationForm.city));
 let inputEmail = document.getElementById('email');
-let orderBtn = document.getElementById('order');
-// //Déclaration des variables pour vérifier la bonne valeur des champs du formulaire
+inputEmail.addEventListener("change",()=>checkvalidinput(validationForm.email));
+//Déclaration des variables pour vérifier la bonne valeur des champs du formulaire
 
+// function SearchInput (inpValue, regex ){
+//   if(inpValue !== regex ){
+//     return(true)
+//   }else{
+//     alert("veuillez utiliser les caractères disponible dans la case du formulaire")
+//   }
+// }
 
 // // adresser une class a l'objet
-class user {
-  constructor(firstName, lastName, adresse, city, email) {
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.adresse = adresse;
-    this.city = city;
-    this.email = email;
-  }
-} console.log(user)
 
 // // Récupération des données du user dans le local storage
-const userInstorage = JSON.parse(localStorage.getItem('user'));
+// const userInstorage = JSON.parse(localStorage.getItem('user'));
 
-// on efface le contenue du localStorage
-// const ClearCart = () => {
-//   // Suppression des informations de panier stockées dans localStorage
-//   document.querySelectorAll(".deleteItem").addEventListener('clik', () => {
-//     console.log(ClearCart)
-//   })
-// }
 // appel au fetch pour retourner le formulaire sur confirmation:
 
- function sendForm(){
+function sendForm() {
   const containedForm = document.querySelector(".cart__order__form");
-
-  containedForm.addEventListener("submit",  function (e){
+  
+  containedForm.addEventListener("submit", function (e) {
     e.preventDefault();
-// appel a l'objet valueForm pour tous les element de l'utilisateur sur le form
+    // appel a l'objet valueForm pour tous les element de l'utilisateur sur le form
     const valueForm = {
-      firstName:(e.target.querySelector("[name=firstname]").value),
-      lastName:(e.target.querySelector("[name=lastName]").value),
-      address:(e.target.querySelector("[name=address]").value),
-      city:(e.target.querySelector("[name=city]").value),
-      email:(e.target.querySelector("[name=email]").value),
+      firstName: (e.target.querySelector("[name=firstname]").value),
+      lastName: (e.target.querySelector("[name=lastName]").value),
+      address: (e.target.querySelector("[name=address]").value),
+      city: (e.target.querySelector("[name=city]").value),
+      email: (e.target.querySelector("[name=email]").value),
     }
     console.log(e)
     //  creation de la charge utile en JSON
     const ChargeForm = JSON.stringify(valueForm);
     // appel de fetch
     fetch("http://localhost:3000/api/products/")
-    .then((res)=> res.json())
-    .then((data) => {
-      // création d'un tableau d'article
-      let productTabs = []
-      //transformer le tableau
-      let transformTab = JSON.stringify({productTabs, valueForm})
-      // ajout de l'objet valueForm et des identifiants des produits au tableau
-      for(let productTab of productTabs){
-        productTab = push(productTabs._id)
-      }
-      console.log(transformTab)
-      console.log(productTabs)
-
-      async function send (order){
-        // appel de l'API
-        let reponse = await fetch("http://localhost:3000/api/products/order",{
-          method:"POST",
-        headers: {"content-type": "application/Json"},
-        body: transformTab, ChargeForm
-        });
-        if (reponse.ok){
-          // reponse du serveur
-          const result = await reponse.json(order)
-          localStorage.removeItem(sendForm)
-          window.location.href =`http://127.0.0.1:5501/front/html/confirmation.html?orderID=${result.orderId}`
-        }else{
-          alert("cela ne fonctionne pas")
+      .then((res) => res.json())
+      .then((data) => {
+        // création d'un tableau d'article
+        let productTabs = []
+        //transformer le tableau
+        let transformTab = JSON.stringify({ productTabs, valueForm })
+        // ajout de l'objet valueForm et des identifiants des produits au tableau
+        for (let productTab of productTabs) {
+          productTab = push(productTabs._id)
         }
-      }
+        console.log(transformTab)
+        console.log(productTabs)
+
+        async function send(order) {
+          // appel de l'API
+          let reponse = await fetch("http://localhost:3000/api/products/order", {
+            method: "POST",
+            headers: { "content-type": "application/Json" },
+            body: transformTab, ChargeForm
+          });
+          if (reponse.ok) {
+            // reponse du serveur
+            const result = await reponse.json(order)
+            localStorage.removeItem(sendForm)
+            window.location.href = `http://127.0.0.1:5501/front/html/confirmation.html?orderID=${result.orderId}`
+          } else {
+            alert("cela ne fonctionne pas")
+          }
+        } console.log(send)
 
 
-      
-      send()
-    })
+        sendForm()
+        send()
+      })
 
 
-    // const response = await fetch("http://localhost:3000/api/products/",{
-    //   methode:"POST",
-    //   headers: {"content-type": "application/Json"},
-    //   body: ChargeForm
-    // })
-    // const data = await response.json();
-    // console.log(data);
-    // if(data.order){
-    //   data.order = true
 
-    //   console.log(data.order)
-    // }else {
-    //   alert("le code ne fonctionne pas")
-    // }
-  })  
+  })
   sendForm()
-  }
-  // orderBtn.addEventListener('click', (e) => {
-  //   e.preventDefault();
-  //   localStorage.setItem('user', JSON.stringify(valueForm));
-  //   // preventdefault => suppression de l'event par default
-  //   window.localStorage.removeItem('cart')
-  //   window.localStorage.clear()
-  //   window.location.href = 'confirmation.html';
-  //   ClearCart()
-  // })
-// object qui appel les info de l'utilisateur qu'il renseigne valueForm
-  
-
-
-
-// const Validate = (object, input) => {
-//   const error = form.querySelector(`#${object}ErrorMsg`)
-//   error.textContent = ''
-//   return userDirect[object].every((constraint) => {
-//     if (!constraint.test(input.value)) {
-//       error.textContent += constraint.message
-//       return false
-//     }
-//     return true
-//   })
-// }
-
-// // declaration d'un fetch pour utiliser orderId pour generer un id de commande
-// const Order = document.querySelector(".cart__order__form")
-// async function postOrder(url, data = {}) {
-//   const response = await fetch(url, {
-//     method: 'POST',
-//     Headers: {
-//       // les trois ligne indique que le fetch accpete l'application json
-//       "content/type": "application/json",
-//       "cache": "*default"
-//     },
-//     body: JSON.stringify(data)
-//   })
-//   // si a l'ouverture de l'api c'est bon donc return 200
-//   if (response.ok === true) {
-//     return response.json();
-//   }
-//   throw new error("Impossible de contacter le serveur")
-
-// }
-// // une boucle for pour aller chercher dans userdirect tous les name qui sont dans le formulaire sur le html de cart.html puis ont lui demande une validation a chaque ajout dans le formulaire par lutilisateur
-// for (const object in userDirect) {
-//   const input = Order.querySelector(`[name="${object}]`)
-//   input.addEventListener("change", (event) => {
-//     Validate(object, input)
-//   })
-
-// }
-
-// // submit= faire parvenir donc ont demande de faire parvenir la liste du formulaire nommer order apres le retour de la reponse async
-// // avec une suppression par default des event default
-// Order.addEventListener('submit', async (event) => {
-//   event.preventDefault()
-
-//   if (Object.keys(userDirect).every((object) => Validate(object, Order.querySelector(`[name="${object}"]`)))) {
-//     const data = await userDirect.order(
-//       {
-//         firstName: userDirect.querySelector('[name="firstName"]').value,
-//         lastName: userDirect.querySelector('[name="lastName"]').value,
-//         address: userDirect.querySelector('[name="address"]').value,
-//         city: userDirect.querySelector('[name="city"]').value,
-//         email: userDirect.querySelector('[name="email"]').value
-//       })
-
-//     orderBtn.addEventListener('click', (e) => {
-//       e.preventDefault();
-//       localStorage.setItem('user', JSON.stringify(userDirect));
-//       // preventdefault => suppression de l'event par default
-//       // window.localStorage.removeItem('object')
-//       window.localStorage.clear()
-//       window.location.href = 'confirmation.html';
-//       ClearCart()
-//       postOrder(`http://localhost:3000/api/products/order=${data.orderId}`)
-//     });
-//   }
-
-
-
-// })
-
+}
 
 
 
