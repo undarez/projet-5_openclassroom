@@ -9,10 +9,10 @@ let totalArticlesPrice = 0;
 let totalArticlesQuantity = 0;
 
 async function showCart() {
-
+    
   for (let i = 0; i < cart.length; i++) {
     let price = await getProductPriceById(cart[i]._id);
-
+    
     totalArticlesQuantity += parseInt(cart[i].qte);
     totalArticlesPrice += parseInt(cart[i].qte * price);
     // ici ont ajoute tous les elements d'affichage de l'api pour que cela fonctionne qui appartienne au locale storage
@@ -57,7 +57,7 @@ showCart();
 // Mise à jour de la quantité de l'article
 function updateQuantity() {
   const quantityInputs = document.querySelectorAll(".itemQuantity");
-  console.log(quantityInputs)
+  // console.log(quantityInputs)
   quantityInputs.forEach(async (quantityInput) => {
     let currentProductPrice = await getProductPriceById(quantityInput.getAttribute("data-id")).then(
       data => data
@@ -163,172 +163,234 @@ const  btnCommander = document.getElementById("order")
 // j'appel les id qui gere les erreurs du formulaire 
 
 const validationForm = {
-  firstName : {
+  firstName: {
     Element: document.getElementById("firstName"),
-    regex: /^[^\d]*$/, 
-    errorMSg: "Prénom invalide"
+    regex: /^[a-zA-ZÀ-ÖØ-öø-ÿ]+$/,
+    errorMSg: "Prénom invalide",
   },
-  lastName : {
+  lastName: {
     Element: document.getElementById("lastName"),
-    regex: /^.*(\s(\B#([a-z]{2,})(?!|[?.,]*\w)\s)+).*$/, 
-    errorMSg: "nom invalide"
+    regex: /^[a-zA-ZÀ-ÖØ-öø-ÿ]+$/,
+    errorMSg: "nom invalide",
   },
-  address : {
+  address: {
     Element: document.getElementById("address"),
-    regex: /^([A-Za-z0-9]+[\s]?)+$/, 
-    errorMSg: "adresse invalide"
+    regex: /^\d{1,5} [A-Za-z0-9\s,'-]{1,30}(?: [A-Za-z\s,'-]+){0,3}$/,
+    errorMSg: "adresse invalide",
   },
-  city : {
+  city: {
     Element: document.getElementById("city"),
-    regex: /^.*(\s(\B#([a-z]{2,})(?!=*\w)\s)+).*$/,
-    errorMSg: "ville invalide"
+    regex: /^[A-Z][a-z]+([\s-][A-Z][a-z]+)*$/,
+    errorMSg: "ville invalide",
   },
-  email : {
+  email: {
     Element: document.getElementById("email"),
-    regex: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
-    errorMSg: "email invalide"
+    regex: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+    errorMSg: "email invalide",
   },
+};
+
+async function validateForm() {
+  for (const field in validationForm) {
+    const { Element, regex, errorMSg } = validationForm[field];
+    const response = await fetch("/validate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        [field]: Element.value,
+        regex,
+      }),
+    });
+    const result = await response.json();
+    if (!result.valid) {
+      console.error(errorMSg);
+    }
+  }
+}
+
+
+  async function checkValidInput(input) {
+  const element = input.Element;
+  const regex = input.regex;
+  const errorMsg = input.errorMsg;
+  const errorTxt = element.nextElementSibling;
+  const isValid = regex.test(element.value);
+  if (!isValid) {
+  errorTxt.innerText = errorMsg;
+  } else {
+  errorTxt.innerText = "";
+  }
+  return isValid;
+  }
   
-}
+  btnCommander.addEventListener("click", async (event) => {
+  event.preventDefault();
+  const contact = {
+  firstName: validationForm.firstName.Element.value,
+  lastName: validationForm.lastName.Element.value,
+  address: validationForm.address.Element.value,
+  city: validationForm.city.Element.value,
+  email: validationForm.email.Element.value,
+  };
+  
+  if (!cart || cart.length === 0) {
+  alert("Your cart is empty, please add at least one item.");
+  } else if (
+  !(await checkValidInput(validationForm.firstName)) ||
+  !(await checkValidInput(validationForm.lastName)) ||
+  !(await checkValidInput(validationForm.address)) ||
+  !(await checkValidInput(validationForm.city)) ||
+  !(await checkValidInput(validationForm.email))
+  ) {
+  alert("The form is incorrect or incomplete, please check it!");
+  } else {
+  alert("Form is saved in local storage");
+  localStorage.setItem("contact", JSON.stringify(contact))
 
-
-// // je verifie avec cette fonction si les valeur de l'input son autoriser
-// puis je regroupe tous ce qui a été déclarer .
-// puis ifRegexValid sert a regrouper toute les const qui vont etre vérifier en une fois
-function checkvalidinput (input){
-  const element = input.Element
-  const regex = input.regex
-  const errorMsg = input.errorMsg
-  const errorTxt = input.Element.nextElementSibling
-  const ifRegexValid = regex.test(element.value)
-  if (ifRegexValid){
-    errorTxt.innerText = errorMsg
-  }else{
-    errorTxt.innerText = ''
-  }
-  return ifRegexValid
-}
-
-
-// ajout d'un event pour récupérer la valeur des information de l'utilisateur sur l'objet contact qui est lui meme appeler 
-btnCommander.addEventListener("click",(e)=>{
-  e.preventDefault();
-  let contact = {
-    firstName: inputFirstName.value,
-    lastName: inputLastName.value,
-    adress:  inputAddress.value,
-    city:  inputCity.value,
-    email:  inputEmail.value
-  }
-  // on vérifie si le panier n'est pas vide 
-  // si il ya pas de qte ou que la qte est egal à zéro alors une alert previens que le panier est vide
-  if (cart == null || cart.length == 0){
-    alert("votre panier est vide veuillez au minimun ajouté une quantité de 1")
-  }
-  else if(
-    checkvalidinput(validationForm.firstName) == false &&
-    checkvalidinput(validationForm.lastName) == false &&
-    checkvalidinput(validationForm.address) == false &&
-    checkvalidinput(validationForm.city) == false &&
-    checkvalidinput(validationForm.email) == false 
-  ){
-    alert("le formulaire n'est pas correct ou imcomplet veuillez verifier SVP!")
-  }else{
-    // j'enregistre le formulaire dans le localstorage
-    // contact correspond a l'objet qui contient les valeur de nom, prenom, city, adress, email
-    localStorage.setItem("contact", JSON.stringify(contact))
+    window.location.href = `http://127.0.0.1:5501/front/html/index.html`
   }
 })
+
 
 // récupérer les elements pour formulaire
 
 // ajout d'un event change qui indique quand l'utilisateur change des donner et vérifie si un caractèere qui n'est pas autoriser est utiliser ou pas.
-let inputFirstName = document.getElementById('firstName');
-inputFirstName.addEventListener("change",()=>checkvalidinput(validationForm.firstName))//.Element,
-  //validationForm.firstName.regex));
-let inputLastName = document.getElementById('lastName');
-inputLastName.addEventListener("change",()=>checkvalidinput(validationForm.lastName));
-let inputAddress = document.getElementById('address');
-address.addEventListener("change",()=>checkvalidinput(validationForm.address));
-let inputCity = document.getElementById('city');
-inputCity.addEventListener("change",()=>checkvalidinput(validationForm.city));
-let inputEmail = document.getElementById('email');
-inputEmail.addEventListener("change",()=>checkvalidinput(validationForm.email));
+// je créé un tableau pour avec leur ID correspondant suivit de leur object 
+// suivit d'une boucle forEACH qui est utiliser sur chaque élement de la liste 
+// et enfin un event est lancer pour déclacher la function checkValidInput sur chaque élement associer
+
+const inputElements = [
+  {id: "firstName", validationForm: validationForm.firstName},
+  {id: "lastName", validationForm: validationForm.lastName},
+  {id: "address", validationForm: validationForm.address},
+  {id: "city", validationForm: validationForm.city},
+  {id: "email", validationForm: validationForm.email}
+  ];
+  
+  inputElements.forEach(inputElement => {
+  let input = document.getElementById(inputElement.id);
+  input.addEventListener("change", () => checkValidInput(inputElement.validationForm));
+  });
+
+// let inputFirstName = document.getElementById('firstName');
+// inputFirstName.addEventListener("change",()=>checkValidInput(validationForm.firstName))//.Element,
+//   //validationForm.firstName.regex));
+// let inputLastName = document.getElementById('lastName');
+// inputLastName.addEventListener("change",()=>checkValidInput(validationForm.lastName));
+// let inputAddress = document.getElementById('address');
+// address.addEventListener("change",()=>checkValidInput(validationForm.address));
+// let inputCity = document.getElementById('city');
+// inputCity.addEventListener("change",()=>checkValidInput(validationForm.city));
+// let inputEmail = document.getElementById('email');
+// inputEmail.addEventListener("change",()=>checkValidInput(validationForm.email));
 //Déclaration des variables pour vérifier la bonne valeur des champs du formulaire
 
-// function SearchInput (inpValue, regex ){
-//   if(inpValue !== regex ){
-//     return(true)
-//   }else{
-//     alert("veuillez utiliser les caractères disponible dans la case du formulaire")
-//   }
-// }
-
-// // adresser une class a l'objet
-
-// // Récupération des données du user dans le local storage
-// const userInstorage = JSON.parse(localStorage.getItem('user'));
 
 // appel au fetch pour retourner le formulaire sur confirmation:
-
-function sendForm() {
-  const containedForm = document.querySelector(".cart__order__form");
-  
-  containedForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-    // appel a l'objet valueForm pour tous les element de l'utilisateur sur le form
-    const valueForm = {
-      firstName: (e.target.querySelector("[name=firstname]").value),
-      lastName: (e.target.querySelector("[name=lastName]").value),
-      address: (e.target.querySelector("[name=address]").value),
-      city: (e.target.querySelector("[name=city]").value),
-      email: (e.target.querySelector("[name=email]").value),
-    }
-    console.log(e)
-    //  creation de la charge utile en JSON
-    const ChargeForm = JSON.stringify(valueForm);
-    // appel de fetch
-    fetch("http://localhost:3000/api/products/")
-      .then((res) => res.json())
-      .then((data) => {
-        // création d'un tableau d'article
-        let productTabs = []
-        //transformer le tableau
-        let transformTab = JSON.stringify({ productTabs, valueForm })
-        // ajout de l'objet valueForm et des identifiants des produits au tableau
-        for (let productTab of productTabs) {
-          productTab = push(productTabs._id)
-        }
-        console.log(transformTab)
-        console.log(productTabs)
-
-        async function send(order) {
-          // appel de l'API
-          let reponse = await fetch("http://localhost:3000/api/products/order", {
-            method: "POST",
-            headers: { "content-type": "application/Json" },
-            body: transformTab, ChargeForm
-          });
-          if (reponse.ok) {
-            // reponse du serveur
-            const result = await reponse.json(order)
-            localStorage.removeItem(sendForm)
-            window.location.href = `http://127.0.0.1:5501/front/html/confirmation.html?orderID=${result.orderId}`
-          } else {
-            alert("cela ne fonctionne pas")
-          }
-        } console.log(send)
+// je créer la fonction qui enverra les données au serveur avec fetch methode post pour rejoindre la page order donc confirmation .html
 
 
-        sendForm()
-        send()
-      })
+async function sendForm(){
 
+  const response = await fetch(`http://localhost:3000/api/products/order`,{
+    method:"POST",
+    //  dans le header j'indique quelle application autoriser dans le fetch
+    headers: {"content-type": "application/json"},
 
-
+    // j'appel l'objet contact qui me sert pour ajouter son contenue (Prenom, nom, adresse, ville,  )
   })
-  sendForm()
-}
+};
+
+
+// function sendForm(){
+//   fetch("http://localhost:3000/api/products/order",{
+//     method: "POST",
+//     // j'indique quelle application es autoriser dans le fetch
+//     headers: { "content-type": "application/Json" },
+
+//     //appel de stringify car la clef contact est un tableau donc a convertir en chaine de caractere
+//     // idem pour cart qui le tableau de base que l'on creer au debut dans la function show cart
+//     // exemple cart[i] 
+//     body: JSON.stringify({contact, cart}),
+//   })
+//   // je demande une response en json pour récupérer orderid je veux dire L API
+//   .then((response)=>{
+//     return response.json()
+//   })
+//   .then((server) => {
+//     const orderUser = server.orderUser
+//     // je rajoute une condition si orderUser est true tu me return undefined 
+//     if(orderUser == undefined){
+//       return true
+//       location.href
+
+//     }
+
+//   })
+// };
+
+
+
+// function sendForm() {
+//   const containedForm = document.querySelector(".cart__order__form");
+  
+//   containedForm.addEventListener("submit", function (e) {
+//     e.preventDefault();
+//     // appel a l'objet valueForm pour tous les element de l'utilisateur sur le form
+//     const valueForm = {
+//       firstName: (e.target.querySelector("[name=firstname]").value),
+//       lastName: (e.target.querySelector("[name=lastName]").value),
+//       address: (e.target.querySelector("[name=address]").value),
+//       city: (e.target.querySelector("[name=city]").value),
+//       email: (e.target.querySelector("[name=email]").value),
+//     }
+//     console.log(e)
+//     //  creation de la charge utile en JSON
+//     const ChargeForm = JSON.stringify(valueForm);
+//     // appel de fetch
+//     fetch("http://localhost:3000/api/products/")
+//       .then((res) => res.json())
+//       .then((data) => {
+//         // création d'un tableau d'article
+//         let productTabs = []
+//         //transformer le tableau
+//         let transformTab = JSON.stringify({ productTabs, valueForm })
+//         // ajout de l'objet valueForm et des identifiants des produits au tableau
+//         for (let productTab of productTabs) {
+//           productTab = push(productTabs._id)
+//         }
+//         console.log(transformTab)
+//         console.log(productTabs)
+
+//         async function send(order) {
+//           // appel de l'API
+//           let reponse = await fetch("http://localhost:3000/api/products/order", {
+//             method: "POST",
+//             headers: { "content-type": "application/Json" },
+//             body: transformTab, ChargeForm
+//           });
+//           if (reponse.ok) {
+//             // reponse du serveur
+//             const result = await reponse.json(order)
+//             localStorage.removeItem(sendForm)
+//             window.location.href = `http://127.0.0.1:5501/front/html/confirmation.html?orderID=${result.orderId}`
+//           } else {
+//             alert("cela ne fonctionne pas")
+//           }
+//         } console.log(send)
+
+
+//         sendForm()
+//         send()
+//       })
+
+
+
+//   })
+//   sendForm()
+// }
 
 
 

@@ -44,9 +44,7 @@ async function displayCanapes() {
         canapeLink.innerHTML = canapeClone
     }
 
-    // canapeClone permet de prendre l'id de la section et de la cloner
-    // la declaration du document avec le appenchild nouvel enfant permet de rajouter un article a cloner
-    // console.log(section)
+    
     
 }
 displayCanapes()
