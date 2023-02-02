@@ -274,20 +274,6 @@ const inputElements = [
   input.addEventListener("change", () => checkValidInput(inputElement.validationForm));
   });
 
-// let inputFirstName = document.getElementById('firstName');
-// inputFirstName.addEventListener("change",()=>checkValidInput(validationForm.firstName))//.Element,
-//   //validationForm.firstName.regex));
-// let inputLastName = document.getElementById('lastName');
-// inputLastName.addEventListener("change",()=>checkValidInput(validationForm.lastName));
-// let inputAddress = document.getElementById('address');
-// address.addEventListener("change",()=>checkValidInput(validationForm.address));
-// let inputCity = document.getElementById('city');
-// inputCity.addEventListener("change",()=>checkValidInput(validationForm.city));
-// let inputEmail = document.getElementById('email');
-// inputEmail.addEventListener("change",()=>checkValidInput(validationForm.email));
-//Déclaration des variables pour vérifier la bonne valeur des champs du formulaire
-
-
 // appel au fetch pour retourner le formulaire sur confirmation:
 // je créer la fonction qui enverra les données au serveur avec fetch methode post pour rejoindre la page order donc confirmation .html
 
@@ -330,67 +316,6 @@ async function sendForm(){
 
 //   })
 // };
-
-
-
-// function sendForm() {
-//   const containedForm = document.querySelector(".cart__order__form");
-  
-//   containedForm.addEventListener("submit", function (e) {
-//     e.preventDefault();
-//     // appel a l'objet valueForm pour tous les element de l'utilisateur sur le form
-//     const valueForm = {
-//       firstName: (e.target.querySelector("[name=firstname]").value),
-//       lastName: (e.target.querySelector("[name=lastName]").value),
-//       address: (e.target.querySelector("[name=address]").value),
-//       city: (e.target.querySelector("[name=city]").value),
-//       email: (e.target.querySelector("[name=email]").value),
-//     }
-//     console.log(e)
-//     //  creation de la charge utile en JSON
-//     const ChargeForm = JSON.stringify(valueForm);
-//     // appel de fetch
-//     fetch("http://localhost:3000/api/products/")
-//       .then((res) => res.json())
-//       .then((data) => {
-//         // création d'un tableau d'article
-//         let productTabs = []
-//         //transformer le tableau
-//         let transformTab = JSON.stringify({ productTabs, valueForm })
-//         // ajout de l'objet valueForm et des identifiants des produits au tableau
-//         for (let productTab of productTabs) {
-//           productTab = push(productTabs._id)
-//         }
-//         console.log(transformTab)
-//         console.log(productTabs)
-
-//         async function send(order) {
-//           // appel de l'API
-//           let reponse = await fetch("http://localhost:3000/api/products/order", {
-//             method: "POST",
-//             headers: { "content-type": "application/Json" },
-//             body: transformTab, ChargeForm
-//           });
-//           if (reponse.ok) {
-//             // reponse du serveur
-//             const result = await reponse.json(order)
-//             localStorage.removeItem(sendForm)
-//             window.location.href = `http://127.0.0.1:5501/front/html/confirmation.html?orderID=${result.orderId}`
-//           } else {
-//             alert("cela ne fonctionne pas")
-//           }
-//         } console.log(send)
-
-
-//         sendForm()
-//         send()
-//       })
-
-
-
-//   })
-//   sendForm()
-// }
 
 
 
