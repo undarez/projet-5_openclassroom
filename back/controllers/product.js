@@ -42,7 +42,7 @@ exports.getOneProduct = (req, res, next) => {
  *   address: string,
  *   city: string,
  *   email: string
- * }
+//  * 
  * products: [string] <-- array of product _id
  *
  */
