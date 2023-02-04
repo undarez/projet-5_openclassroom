@@ -248,7 +248,7 @@ btnCommander.addEventListener("click", async (event) => {
   } else {
     alert("Form is saved in local storage");
     localStorage.setItem("contact", JSON.stringify(contact))
-    newUser(cart)
+    
 
     // window.location.href = `http://127.0.0.1:5501/front/html/confirmation.html`
   }
@@ -296,31 +296,42 @@ products = []
 // copie du tableau cart
 products = cart 
 
-for( let j = 0; j < products.length; j++){
-
-
-
-  // console.log(products[j])
+const sendData = {
+  contact : contact,
+  products : products
 }
 
- function newUser(data) {
+// for( let j = 0; j < products.length; j++){
+
+
+
+//   // console.log(products[j])
+// }
+
+// console.log(products.length)
+  
+// function newUser(data) {
   // appel de fetch
   fetch( apiURL + "/order",{ //order est demander comme parametre dans l'énnoncé
     method: "POST",
     headers: {"Content-Type": "application/json",
   },
-  body: JSON.stringify(data)//appel des des info de L'API en JSON
+  body: JSON.stringify(sendData)//appel des des info de L'API en JSON
   }).then ((response)=>{
-    
+    return response.json()
+  })
+  .then((data)=>{
+    const {orderId} = data
+    return {contact, products, orderId}
+    console.log(data)
   })
   .catch((error)=>{
-    alert("les données ne sont pas transmise au serveru", error)
+    alert("les données ne sont pas transmise au server", error)
   })
-  window.location.href = "confirmation.html"
-}
-return response.json()
-  
-  
+  // window.location.href = "confirmation.html"
+// }
+
+
 
 
 // async function newUser( data = {}) {
