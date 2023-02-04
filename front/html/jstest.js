@@ -227,3 +227,54 @@ cartForm.addEventListener("submit", (evnt) => { // Lorsqu'on clique sur le bouto
   evnt.preventDefault(); // Annuler l'action par défaut du bouton submit, nous voulons que la page de confirmation s'affiche
   getFormData();
 });
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  // Valider les champs requis
+  if (!firstname.value || !lastname.value || !address.value || !city.value || !email.value) {
+    alert("Veuillez remplir tous les champs requis");
+    return;
+  }
+
+  // Valider le type de chaque champ
+  if (typeof firstname.value !== "string" || typeof lastname.value !== "string" || typeof address.value !== "string" || typeof city.value !== "string" || typeof email.value !== "string") {
+    alert("Tous les champs doivent être de type string");
+    return;
+  }
+
+  // Récupérer les produits dans le panier
+  const cart = JSON.parse(localStorage.getItem("cart"));
+  const productIds = cart.map(item => item._id);
+
+  // Préparer les données à envoyer au serveur
+  const contact = {
+    firstname: firstname.value,
+    lastname: lastname.value,
+    address: address.value,
+    city: city.value,
+    email: email.value
+  };
+  const data = {
+    contact,
+    productIds
+  };
+
+  // Envoyer les données au serveur avec la méthode POST
+  const response = await fetch("/api/order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+
+  // Vérifier la réponse du serveur
+  if (response.ok) {
+    const result = await response.json();
+    alert(result.message);
+  } else {
+    const error = await response.json();
+    alert(error.message);
+  }
+});

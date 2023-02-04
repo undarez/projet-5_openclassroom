@@ -278,71 +278,120 @@ inputElements.forEach(inputElement => {
 // appel au fetch pour retourner le formulaire sur confirmation:
 // je créer la fonction qui enverra les données au serveur avec fetch methode post pour rejoindre la page order donc confirmation .html
 
- 
+
+const form = document.querySelector(".cart__order");
+const firstname = document.querySelector("#firstName");
+const lastname = document.querySelector("#lastName");
+const address = document.querySelector("#address");
+const city = document.querySelector("#city");
+const email = document.querySelector("#email");
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  // valider les champs du form
+  // une condition if si firstname est non logique ou
+  if (!firstname.value || 
+  !lastname.value ||
+  !address.value ||
+  !city.value ||
+  !email.value ) {
+    alert("Veuillez remplir tous les champs requis")
+
+  }
+  // Valider le type de chaque champ
+  if (typeof firstname.value !== "string" || 
+  typeof lastname.value !== "string" || 
+  typeof address.value !== "string" || 
+  typeof city.value !== "string" || 
+  typeof email.value !== "string") {
+    alert("Tous les champs doivent être de type string (chaine de caractères)");
+    return;
+  }
+      // typeof  L' typeofopérateur n'est pas une variable. C'est un opérateur. Les opérateurs ( + - * / ) n'ont aucun type de données.
+
+// Mais, l' typeofopérateur renvoie toujours une chaîne (contenant le type de l'opérande).
+
+
+
+
+
+const cartProductOrder = JSON.parse(localStorage.getItem("cart"))
+
+// products appel le tableau cart qui est a la ligne 1
+
+const products = cartProductOrder.map(item => item._id)
 // creation de l'objet contact
 
-let contact = {
-  firstName: firstName,
-  lastName: lastName,
-  address: address,
-  city: city,
-  email: email
+const contact = {
+  firstName: firstname.value,
+  lastName: lastname.value,
+  address: address.value,
+  city: city.value,
+  email: email.value
 };
 
-const apiURL = "http://localhost:3000/api/products"
-
-// products = tableau vide
-products = []
-// copie du tableau cart
-products = cart 
 
 const sendData = {
-  contact : contact,
-  products : products
+  contact,
+  products
 }
 
-// for( let j = 0; j < products.length; j++){
-
-
-
-//   // console.log(products[j])
-// }
-
-// console.log(products.length)
-  
-// function newUser(data) {
-  // appel de fetch
-  fetch( apiURL + "/order",{ //order est demander comme parametre dans l'énnoncé
-    method: "POST",
-    headers: {"Content-Type": "application/json",
+// Envoyer les données au serveur avec la méthode POST
+const response = await fetch("http://localhost:3000/api/products/order", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
   },
-  body: JSON.stringify(sendData)//appel des des info de L'API en JSON
-  }).then ((response)=>{
-    return response.json()
-  })
-  .then((data)=>{
-    const {orderId} = data
-    return {contact, products, orderId}
-    console.log(data)
-  })
-  .catch((error)=>{
-    alert("les données ne sont pas transmise au server", error)
-  })
-  // window.location.href = "confirmation.html"
-// }
+  body: JSON.stringify(sendData)
+});
+
+// Vérifier la réponse du serveur
+if (response.ok) {
+  const result = await response.json();
+  alert(result.message);
+} else {
+  const error = await response.json();
+  alert(error.message);
+}
+// window.location.href = "confirmation.html"
+
+
+})
+
+// // function newUser(data) {
+  //   // appel de fetch
+  //   fetch( apiURL + "/order",{ //order est demander comme parametre dans l'énnoncé
+  //     method: "POST",
+  //     headers: {"Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify(sendData)//appel des des info de L'API en JSON
+  //   }).then ((response)=>{
+    //     return response.json()
+    //   })
+    //   .then((data)=>{
+      //     const {orderId} = data
+      //     return {contact, products, orderId}
+      //   })
+      //   .catch((error)=>{
+        //     alert("les données ne sont pas transmise au server", error)
+        //   })
+//   // window.location.href = "confirmation.html"
+//   // }
+
 
 
 
 
 // async function newUser( data = {}) {
-//   const response = await fetch("http://localhost:3000/api/products/order", {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json'
-//     },
-//     body: JSON.stringify(data)
-//   });
-//   return response.json();
+  //   const response = await fetch("http://localhost:3000/api/products/order", {
+    //     method: 'POST',
+    //     headers: {
+      //       'Content-Type': 'application/json'
+      //     },
+      //     body: JSON.stringify(data)
+      //   });
+      //   return response.json();
 // }
 
 // appel de l'objet contact avec newUser (les articles commandées et les infos du formulaire)
