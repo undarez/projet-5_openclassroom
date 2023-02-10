@@ -263,7 +263,7 @@ document.querySelector(".cart__order__form").addEventListener("submit", (event) 
     city: inputCity.value,
     email: inputEmail.value
   }
-  if (cart == null ||cart.length == "" || cart.length === 0 ) {
+  if (cart == null ||cart.length == "" || cart.length === 0 ||articles.length === 0) {
 
     alert("Your cart is empty, please add at least one item.");
     // si le panier es vide alors une alert previen qu'il faut ajouté un article
