@@ -1,16 +1,15 @@
 let cart = JSON.parse(localStorage.getItem("cart"));
-
 let articles = document.querySelector("#cart__items");
 let totalPrice = document.querySelector("#totalPrice");
 let totalQuantity = document.querySelector("#totalQuantity");
 let totalArticlesPrice = 0;
 let totalArticlesQuantity = 0;
-
+let productPrices = {}
 async function showCart() {
 
   for (let i = 0; i < cart.length; i++) {
     let price = await getProductPriceById(cart[i]._id);
-
+    productPrices[cart[i]._id] = price;
     totalArticlesQuantity += parseInt(cart[i].qte);
     totalArticlesPrice += parseInt(cart[i].qte * price);
     // ici ont ajoute tous les elements d'affichage de l'api pour que cela fonctionne qui appartienne au locale storage
@@ -41,11 +40,9 @@ async function showCart() {
     totalQuantity.innerText = totalArticlesQuantity;
     totalPrice.innerText = totalArticlesPrice;
 
-
   }
   updateQuantity();
   deleteItemCard();
-
 }
 // on appelle la fonction qui rempli la page showCart
 
@@ -63,7 +60,7 @@ function updateQuantity() {
     // ajout de l'event change pour permettre à l'utilisateur de changer la quantité au cas ou il est oublier un article.
     quantityInput.addEventListener("change", (event) => {
       event.preventDefault();
-      const inputValue = event.target.value;
+      let inputValue = event.target.value;
       const dataId = event.target.getAttribute("data-id");
       const dataColor = event.target.getAttribute("data-color");
       let cartItems = localStorage.getItem("cart");
@@ -81,21 +78,44 @@ function updateQuantity() {
         if (item._id === dataId && item.color === dataColor) {
           item.quantity = inputValue;
         }
+        console.log(item._id)
         return item;
       });
-
       if (inputValue > 100 || inputValue < 1) {
-        alert("La quantité doit etre comprise entre 1 et 100");
+        alert("La quantité doit être comprise entre 1 et 100");
         return;
       }
+
+      items.forEach((item) => {
+        newQuantity += parseInt(item.quantity);
+        newPrice += parseInt(item.quantity) * productPrices[item._id];
+      });
+
+      totalQuantity.textContent = newQuantity;
+      totalPrice.textContent = newPrice;
+
       let itemsStr = JSON.stringify(items);
       localStorage.setItem("cart", itemsStr);
-      // updateCart();
     });
   });
 }
 
+
+
+
+
+//       if (inputValue > 100 || inputValue < 1) {
+//         alert("La quantité doit etre comprise entre 1 et 100");
+//         return;
+//       }
+//       let itemsStr = JSON.stringify(items);
+//       localStorage.setItem("cart", itemsStr);
+//     });
+//   });
+// }
+
 // On récupère le prix de l'article suivant son id dans la l'API avec l'artId
+
 async function getProductPriceById(artId) {
   return fetch("http://localhost:3000/api/products/")
     .then(function (res) {
@@ -124,11 +144,6 @@ function deleteItemCard() {
   // boucle for pour chaque article du tableau deleteButton 
   for (let i = 0; i < deleteButtons.length; i++) {
     deleteButtons[i].addEventListener("click", () => {
-      // parentElement.style.display permet de rendre invisible l'element selectionner avec le bouuton delete
-      deleteButtons[i].parentElement.style.display = "none"
-
-      // Copie du tableau cart dans le tableau articleSuppr
-      articleSuppr = cart
 
       // j'ajoute une demande de confirmation de suppression d'article au cas ou le client est fait une mauvaise manip
 
@@ -136,21 +151,24 @@ function deleteItemCard() {
         "Etes vous sûr de vouloir supprimer cet article ?"
       );
       if (deleteComfirm == true) {
+        totalArticlesPrice -= productPrices[cart[i]._id] * cart[i].qte;
+        totalArticlesQuantity -= cart[i].qte;
+        totalQuantity.innerText = totalArticlesQuantity;
+        totalPrice.innerText = totalArticlesPrice;
+
         // Array.prototype.splice() supprime un élément à chaque index [i] du tableau écouté
-        articleSuppr.splice([i], 1)
+        cart.splice(i, 1)
         //  je récupere l'article qui est stoker dans le local storage pour le transformer en chaine de caractere grace a stringify.
-        cart = localStorage.setItem("cart", JSON.stringify(articleSuppr))
+        localStorage.setItem("cart", JSON.stringify(cart))
         alert("article supprimé avec succès")
+        deleteButtons[i].closest(".cart__item").remove();
+
 
       }
 
-      // j'actualise la page apres la suppression de l'article du panier 
-      window.location.href = `http://127.0.0.1:5501/front/html/cart.html`
     })
   }
 }
-
-
 
 // Sacré formulaire
 
@@ -164,40 +182,43 @@ const validationForm = {
   firstName: {
     Element: document.getElementById("firstName"),
     regex: /^[a-zA-ZÀ-ÖØ-öø-ÿ]+$/,
-    errorMSg: "Prénom invalide",
+    errorMsg: "Prénom invalide",
   },
   lastName: {
     Element: document.getElementById("lastName"),
     regex: /^[a-zA-ZÀ-ÖØ-öø-ÿ]+$/,
-    errorMSg: "nom invalide",
+    errorMsg: "nom invalide",
   },
   address: {
     Element: document.getElementById("address"),
     regex: /^\d{1,5} [A-Za-z0-9\s,'-]{1,30}(?: [A-Za-z\s,'-]+){0,3}$/,
-    errorMSg: "adresse invalide",
+    errorMsg: "adresse invalide",
   },
   city: {
     Element: document.getElementById("city"),
     regex: /^[A-Z][a-z]+([\s-][A-Z][a-z]+)*$/,
-    errorMSg: "ville invalide",
+    errorMsg: "ville invalide",
   },
   email: {
     Element: document.getElementById("email"),
     regex: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
-    errorMSg: "email invalide",
+    errorMsg: "email invalide",
   },
 };
 let inputFirstName = document.getElementById('firstName');
-inputFirstName.addEventListener("change",()=>checkValidInput(validationForm.firstName))//.Element,
-  //validationForm.firstName.regex));
+inputFirstName.addEventListener("change", () => checkValidInput(validationForm.firstName));
+
 let inputLastName = document.getElementById('lastName');
-inputLastName.addEventListener("change",()=>checkValidInput(validationForm.lastName));
+inputLastName.addEventListener("change", () => checkValidInput(validationForm.lastName));
+
 let inputAddress = document.getElementById('address');
-address.addEventListener("change",()=>checkValidInput(validationForm.address));
+address.addEventListener("change", () => checkValidInput(validationForm.address));
+
 let inputCity = document.getElementById('city');
-inputCity.addEventListener("change",()=>checkValidInput(validationForm.city));
+inputCity.addEventListener("change", () => checkValidInput(validationForm.city));
+
 let inputEmail = document.getElementById('email');
-inputEmail.addEventListener("change",()=>checkValidInput(validationForm.email));
+inputEmail.addEventListener("change", () => checkValidInput(validationForm.email));
 
 // // je verifie avec cette fonction si les valeur de l'input son autoriser
 // puis je regroupe tous ce qui a été déclarer .
@@ -210,15 +231,18 @@ async function checkValidInput(input) {
   const isValid = regex.test(element.value);
   if (!isValid) {
     errorTxt.innerText = errorMsg;
+    console.log(errorMsg)
   } else {
     errorTxt.innerText = "";
   }
   return isValid;
 }
 
+// appel au fetch pour retourner le formulaire sur confirmation:
+// je créer la fonction qui enverra les données au serveur avec fetch methode post pour rejoindre la page order donc confirmation .html
 const sendForm = async (contact, products) => {
-  const response = await fetch(" http://localhost:3000/api/products/order ",{
-    method:"POST",
+  const response = await fetch(" http://localhost:3000/api/products/order ", {
+    method: "POST",
     headers: {
       'Content-Type': 'application/json',
     },
@@ -230,66 +254,46 @@ const sendForm = async (contact, products) => {
   return dataRes;
 }
 
-btnCommander.addEventListener("click",  (event) => {
+document.querySelector(".cart__order__form").addEventListener("submit", (event) => {
   event.preventDefault();
-  let contact ={
+  let contact = {
     firstName: inputFirstName.value,
     lastName: inputLastName.value,
     address: inputAddress.value,
     city: inputCity.value,
     email: inputEmail.value
   }
-  localStorage.setItem("contact", JSON.stringify(contact));
-  sendForm({contact, products: [cart.map((product)=> product._id)]})
-  .then((data)=>{
-    localStorage.setItem('orderId', JSON.stringify(data.orderId));
-    localStorage.removeItem('cart');
-    localStorage.removeItem('contact');
-    window.location.href = 'confirmation.html';
-    console.log(contact)
-    // console.log(product)
-    // console.log(orderId)
-  });
-  
-  
-  
-  
-  
-  if (cart == null || cart.length === 0) {
+  if (cart == null ||cart.length == "" || cart.length === 0 ) {
+
     alert("Your cart is empty, please add at least one item.");
+    // si le panier es vide alors une alert previen qu'il faut ajouté un article
+   
+    window.location.href = 'index.html'
+    
   } else if (
-    checkValidInput(validationForm.firstName) == false &&
-    checkValidInput(validationForm.lastName) == false &&
-    checkValidInput(validationForm.address) == false &&
-    checkValidInput(validationForm.city) == false &&
-    checkValidInput(validationForm.email)== false
-    ) {
-      alert("The form is incorrect or incomplete, please check it!");
-    } else {
-      alert("Form is saved in local storage");
-      localStorage.setItem("contact", JSON.stringify(contact))
-      
-      
+    checkValidInput(validationForm.firstName) == false ||
+    checkValidInput(validationForm.lastName) == false ||
+    checkValidInput(validationForm.address) == false ||
+    checkValidInput(validationForm.city) == false ||
+    checkValidInput(validationForm.email) == false
+    
+  ) {
+    alert("Votre panier est vide, veuillez ajouter au moins un article.");
+  }
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(inputEmail.value)) {
+      alert("l'adresse email n'est pas valide.");
+      return;
     }
+    localStorage.setItem("contact", JSON.stringify(contact));
+    sendForm({ contact, products: cart.map((product) => product._id) })
+      .then((data) => {
+        localStorage.removeItem('cart');
+        window.location.href = 'confirmation.html?id=' + data.orderId;
+      });
+  
+
 })
-
-
-// récupérer les elements pour formulaire
-
-// ajout d'un event change qui indique quand l'utilisateur change des donner et vérifie si un caractèere qui n'est pas autoriser est utiliser ou pas.
-// je créé un tableau pour avec leur ID correspondant suivit de leur object 
-// suivit d'une boucle forEACH qui est utiliser sur chaque élement de la liste 
-// et enfin un event est lancer pour déclacher la function checkValidInput sur chaque élement associer
-
-
-
-//Déclaration des variables pour vérifier la bonne valeur des champs du formulaire
-
-
-// appel au fetch pour retourner le formulaire sur confirmation:
-// je créer la fonction qui enverra les données au serveur avec fetch methode post pour rejoindre la page order donc confirmation .html
-
-
 
 
 

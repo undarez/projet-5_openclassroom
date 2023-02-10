@@ -10,6 +10,7 @@ const section = document.getElementById('items')
 async function getCanapes() {
     return await fetch("http://localhost:3000/api/products")
         .then((contenuArticleResponse) => {
+            // console.log(contenuArticleResponse)
             // quand nous faison un return dans un then dans ce cas on peux l'appeler dans le prochain then
             return contenuArticleResponse.json()
         })
@@ -22,19 +23,11 @@ async function getCanapes() {
 // displayCanapes permet de cloner les articles au niveau du html tout en appelant les id canapes du debut
 async function displayCanapes() {
     const canapes = await getCanapes()
-    // creation de l'element a
-    // ajouter l'atribut href avec sa valeur
-    
-    // je rajoute le a dans la section
-    // const resultat = canapes.find((elt) => { elt === canape._id
-    //     return elt
-        
-    // })
     for(let canape of canapes){
         const canapeLink = document.createElement("a")
         canapeLink.setAttribute("href", `./product.html?id=${canape._id}`)
         section.appendChild(canapeLink)
-
+        
         const canapeClone = 
         `<article>
             <img src= ${canape.imageUrl} alt= ${canape.altTxt}>
@@ -42,6 +35,7 @@ async function displayCanapes() {
             <p class="productDescription"> ${canape.description} </p>
         </article> `
         canapeLink.innerHTML = canapeClone
+        console.log(canapeClone)
     }
 
     

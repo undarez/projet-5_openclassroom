@@ -42,22 +42,22 @@ let color = document.getElementById("colors");
 function choixColors() {
   // || = ou logique pipe
   // if = color === veux dire est égale la couleur choisis , puis le === null est égal à vide donc une alert en envoyer pour indiquer qu'il faut choisir une couleur obligatoire pour valider le panier.
-  if (containercolor.value === "" || containercolor.value === null) {
+  if (containercolor.value === "") {
     alert("veuillez choisir une couleur");
-    return
+    return false;
   }
-
+  return true;
 }
 
 // choix qte = fonction qui renseigne dans le panier la quantité choisi par l'utilisateur.
 let qte = document.getElementById("quantity");
 function choixQte() {
   // création d'une variable qui indique la class qui remonte la quantité , qte.value cible la valeur inferireur a 1 ou null dans ce cas une alerte ce déclanche.
-  if (qte.value < 1 || qte.value === null) {
-    alert("veuillez choisir une quantité");
-    return;
-  }
-
+  if (qte.value < 1 || qte.value > 100) {
+    alert("Veuillez choisir une valeur en 1 et 100");
+    return false;
+  } 
+  return true
 }
 
 // Rendu du produit sur la page produit
@@ -75,44 +75,57 @@ renderProduct();
 
 
 // articleTab est un tableau qui contien les articles du panier
-  
-  // articleTab est un tableau qui contien les articles du panier
-  const articleTab = []
-  const inlocalStorage = JSON.parse(localStorage.getItem("cart"))
- 
-  
-addToCart.addEventListener('click', () => {
-            choixColors();
-            choixQte();
-            let articlePanier = {
-              _id: article._id,
-              description: article.description,
-              name: article.name,
-              // ici ont supprimme le article.price pour pas que l'utilisateur mal aviser modifie le prix
-              // price : article.price,
-              imageUrl: article.imageUrl,
-              altTxt: article.altTxt,
-              color: containercolor.value,
-              qte: Number(qte.value)
-            };
-            if(inlocalStorage) {
-              const productInCart = inlocalStorage.find((product) => product._id === articlePanier._id && product.color === articlePanier.color);
-              if(productInCart) {
-                productInCart.color = containercolor.value
-                  productInCart.qte += articlePanier.qte;
-                  articleTab.push(productInCart, ...inlocalStorage.filter((product) => product._id !== articlePanier._id));
-              } else {
-                  articleTab.push(...inlocalStorage, articlePanier);
-              }
-            } else {
-              articleTab.push(articlePanier);
-          }  
 
-    window.localStorage.setItem('cart', JSON.stringify(articleTab));
-    window.location.href = 'cart.html';
+// articleTab est un tableau qui contien les articles du panier
+const articleTab = []
+const inlocalStorage = JSON.parse(localStorage.getItem("cart"))
+
+
+addToCart.addEventListener('click', () => {
+
+  if (choixColors() && choixQte()){
+    alert("vous avez ajoutez un article à votre panier")
+  }else{
+    (!choixColors() || !choixQte())
+        return
+      }
+  
+  // if (choixColors() && choixQte()){
+  //   alert("vous avez ajoutez un article à votre panier")
+  // }else
+
+  //   // si les deux fonctions non pas ete sélectionner avec leur valeur alors cela return false
+  // if (!choixColors() || !choixQte()){
+  //   return
+  // }
+  let articlePanier = {
+    _id: article._id,
+    description: article.description,
+    name: article.name,
+    // ici ont supprimme le article.price pour pas que l'utilisateur mal aviser modifie le prix
+    // price : article.price,
+    imageUrl: article.imageUrl,
+    altTxt: article.altTxt,
+    color: containercolor.value,
+    qte: Number(qte.value)
+  };
+  if (inlocalStorage) {
+    const productInCart = inlocalStorage.find((product) => product._id === articlePanier._id && product.color === articlePanier.color);
+    if (productInCart) {
+      productInCart.color = containercolor.value
+      productInCart.qte += articlePanier.qte;
+      articleTab.push(productInCart, ...inlocalStorage.filter((product) => product._id !== articlePanier._id));
+    } else {
+      articleTab.push(...inlocalStorage, articlePanier);
+    }
+  } else {
+    articleTab.push(articlePanier);
   }
-  )
-  
-  
-  
+
+  window.localStorage.setItem('cart', JSON.stringify(articleTab));
+  window.location.href = 'cart.html';
+})
+
+
+
 

@@ -1,8 +1,6 @@
-const orderId =  document.getElementById("orderId")
+let id = new URL(window.location.href).searchParams.get("id")
 
-const dataOrderId = JSON.parse(localStorage.getItem("orderId"));
-
-orderId.innerText = dataOrderId
+orderId.innerText = id
 
 
 // ajout d'un boutton qui permet de revenir a l'acceuil
@@ -30,7 +28,7 @@ btnRetour.style = styleBtnRetour
 
 // une condition si pas de commande le boutton n'apparait pas si il y en a une dans ce cas il apparait
 
-if (!dataOrderId){
+if (!id){
   orderId.removeChild(btnRetour)
 }else{orderId.appendChild(btnRetour)}
 
@@ -39,20 +37,3 @@ btnRetour.addEventListener("click", function() {
   localStorage.clear();
   window.location.href ="index.html"
 });
-
-
-
-
-// const btnRetour = document.createElement("button")
-// const r = retourAcceuil = document.createTextNode("retour à l'acceuil")
-// btnRetour.appendChild(r)
-// document.body.appendChild(btnRetour)
-// btnRetour.innerText = "retour à l'acceuil"
-// btnRetour.addEventListener("click", ()=>{
-//   alert("vous retournez a l'acceuil")
-//   window.location.href = "article.js"
-// })
-
-
-// order.innerText = new Date().getTime()
-// console.log(order);
