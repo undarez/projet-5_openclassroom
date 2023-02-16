@@ -2,12 +2,10 @@ let id = new URL(window.location.href).searchParams.get("id")
 
 orderId.innerText = id
 
-
 // ajout d'un boutton qui permet de revenir a l'acceuil
 // le btn = retourAcceuil
 // const R = le text (noeud textuel)
 // btn.appenchild(r) ajout du text (retour à l'acceuil)
-
 
 const btnRetour = document.createElement("button");
 btnRetour.innerHTML = "Retour à l'acceuil";

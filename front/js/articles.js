@@ -1,7 +1,3 @@
-// creer une function anonyme qui séxécute seul
-// creer une function qui return fetch avec le lien url du catalogue canapés Catalogue de canapés : http://localhost:3000/api/products.
-// creer une function qui permet d'afficher les elements de chaque articles
-
 // la function getcanape permet de return grace a fetch
 // .then function permet de return la function pour que le fichier url en json pour qu'il soit lisible par json.
 
@@ -10,7 +6,6 @@ const section = document.getElementById('items')
 async function getCanapes() {
     return await fetch("http://localhost:3000/api/products")
         .then((contenuArticleResponse) => {
-            // console.log(contenuArticleResponse)
             // quand nous faison un return dans un then dans ce cas on peux l'appeler dans le prochain then
             return contenuArticleResponse.json()
         })
@@ -18,7 +13,6 @@ async function getCanapes() {
         .catch((error) => {
             alert(error, "l'API est hors-ligne")
         })
-
 }
 // displayCanapes permet de cloner les articles au niveau du html tout en appelant les id canapes du debut
 async function displayCanapes() {
@@ -37,9 +31,5 @@ async function displayCanapes() {
         canapeLink.innerHTML = canapeClone
         console.log(canapeClone)
     }
-
-    
-    
 }
 displayCanapes()
-

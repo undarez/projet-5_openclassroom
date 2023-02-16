@@ -4,9 +4,12 @@ let totalPrice = document.querySelector("#totalPrice");
 let totalQuantity = document.querySelector("#totalQuantity");
 let totalArticlesPrice = 0;
 let totalArticlesQuantity = 0;
+totalPrice.textContent = 0;
+totalQuantity.textContent = 0;
 let productPrices = {}
-async function showCart() {
 
+async function showCart() {
+// console.log(cart)
   for (let i = 0; i < cart.length; i++) {
     let price = await getProductPriceById(cart[i]._id);
     productPrices[cart[i]._id] = price;
@@ -19,27 +22,24 @@ async function showCart() {
     </div>
     <div class="cart__item__content">
     <div class="cart__item__content__description">
-                      <h2>${cart[i].name}</h2>
-                      <p>${cart[i].color}</p>
-                      <p>${price} €</p>
-                    </div>
-                    <div class="cart__item__content__settings">
-                    <div class="cart__item__content__settings__quantity">
-                    <p>Qté : ${cart[i].qte} </p>
-                    <input  data-id="${cart[i]._id}" data-color="${cart[i].color}" type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${cart[i].qte}">
-                    </div>
-                    <div class="cart__item__content__settings__delete">
-                    <p  data-id="${cart[i]._id}" data-color="${cart[i].color}" class="deleteItem">Supprimer</p>
-                    </div>
-                    </div>
-                    </div>
-                    </article>`;
+    <h2>${cart[i].name}</h2>
+     <p>${cart[i].color}</p>
+     <p>${price} €</p> </div>
+    <div class="cart__item__content__settings">
+    <div class="cart__item__content__settings__quantity">
+      <p>Qté : ${cart[i].qte} </p>
+      <input  data-id="${cart[i]._id}" data-color="${cart[i].color}" type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${cart[i].qte}"> </div>
+    <div class="cart__item__content__settings__delete">
+     <p  data-id="${cart[i]._id}" data-color="${cart[i].color}" class="deleteItem">Supprimer</p>
+     </div>
+     </div>
+    </div>
+    </article>`;
 
     articles.innerHTML += article;
     // les deux ligne suivante permet de faire l'affichage sur le site donc envoyer du contenue html
     totalQuantity.innerText = totalArticlesQuantity;
     totalPrice.innerText = totalArticlesPrice;
-
   }
   updateQuantity();
   deleteItemCard();
@@ -47,7 +47,6 @@ async function showCart() {
 // on appelle la fonction qui rempli la page showCart
 
 showCart();
-
 
 // Mise à jour de la quantité de l'article
 function updateQuantity() {
@@ -57,6 +56,7 @@ function updateQuantity() {
     let currentProductPrice = await getProductPriceById(quantityInput.getAttribute("data-id")).then(
       data => data
     )
+    console.log(quantityInputs)
     // ajout de l'event change pour permettre à l'utilisateur de changer la quantité au cas ou il est oublier un article.
     quantityInput.addEventListener("change", (event) => {
       event.preventDefault();
@@ -73,7 +73,7 @@ function updateQuantity() {
       newPrice += parseInt(currentProductPrice * newQuantity)
       totalPrice.innerText = newPrice;
 
-      // ci ont creer un map donc qui crée un tableau pour récupérer les elements sans supprimer ce qui y a a l'interieur
+      // ici ont creer un map donc qui crée un tableau pour récupérer les elements sans supprimer ce qui y a a l'interieur
       items = items.map((item, index) => {
         if (item._id === dataId && item.color === dataColor) {
           item.quantity = inputValue;
@@ -100,20 +100,6 @@ function updateQuantity() {
   });
 }
 
-
-
-
-
-//       if (inputValue > 100 || inputValue < 1) {
-//         alert("La quantité doit etre comprise entre 1 et 100");
-//         return;
-//       }
-//       let itemsStr = JSON.stringify(items);
-//       localStorage.setItem("cart", itemsStr);
-//     });
-//   });
-// }
-
 // On récupère le prix de l'article suivant son id dans la l'API avec l'artId
 
 async function getProductPriceById(artId) {
@@ -134,13 +120,12 @@ async function getProductPriceById(artId) {
     });
 }
 
-
 // Suppression de l'article choisi
 function deleteItemCard() {
   // j'appel l'ID qui contien le bouton deleteItem qui permet de supprimer les articles du panier en le transformant en tableau ce qui permet d'ajouter les articles à supprimer dans ce tableau.
 
   let deleteButtons = Array.from(document.querySelectorAll(".deleteItem"));
-  let articleSuppr = [];
+
   // boucle for pour chaque article du tableau deleteButton 
   for (let i = 0; i < deleteButtons.length; i++) {
     deleteButtons[i].addEventListener("click", () => {
@@ -158,23 +143,19 @@ function deleteItemCard() {
 
         // Array.prototype.splice() supprime un élément à chaque index [i] du tableau écouté
         cart.splice(i, 1)
+
         //  je récupere l'article qui est stoker dans le local storage pour le transformer en chaine de caractere grace a stringify.
+
         localStorage.setItem("cart", JSON.stringify(cart))
         alert("article supprimé avec succès")
         deleteButtons[i].closest(".cart__item").remove();
-
-
       }
-
     })
   }
 }
 
-// Sacré formulaire
-
 const btnCommander = document.getElementById("order")
-
-// validation du formulaire avec les regex puis requette serveru pour la validation
+// validation du formulaire avec les regex puis requette pour la validation
 // les regex afficher permette d'etre utiliser dans le formulaire
 // j'appel les id qui gere les erreurs du formulaire 
 
@@ -191,7 +172,7 @@ const validationForm = {
   },
   address: {
     Element: document.getElementById("address"),
-    regex: /^\d{1,5} [A-Za-z0-9\s,'-]{1,30}(?: [A-Za-z\s,'-]+){0,3}$/,
+    regex: /^.+/,
     errorMsg: "adresse invalide",
   },
   city: {
@@ -201,10 +182,12 @@ const validationForm = {
   },
   email: {
     Element: document.getElementById("email"),
-    regex: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+    regex: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/,
     errorMsg: "email invalide",
-  },
+  }
 };
+
+
 let inputFirstName = document.getElementById('firstName');
 inputFirstName.addEventListener("change", () => checkValidInput(validationForm.firstName));
 
@@ -223,7 +206,7 @@ inputEmail.addEventListener("change", () => checkValidInput(validationForm.email
 // // je verifie avec cette fonction si les valeur de l'input son autoriser
 // puis je regroupe tous ce qui a été déclarer .
 // puis ifRegexValid sert a regrouper toute les const qui vont etre vérifier en une fois
-async function checkValidInput(input) {
+function checkValidInput(input) {
   const element = input.Element;
   const regex = input.regex;
   const errorMsg = input.errorMsg;
@@ -248,7 +231,6 @@ const sendForm = async (contact, products) => {
     },
     body: JSON.stringify(contact, products),
   })
-  // console.log(contact, products)
   const dataRes = await response.json();
   console.log(dataRes)
   return dataRes;
@@ -256,46 +238,40 @@ const sendForm = async (contact, products) => {
 
 document.querySelector(".cart__order__form").addEventListener("submit", (event) => {
   event.preventDefault();
+
   let contact = {
     firstName: inputFirstName.value,
     lastName: inputLastName.value,
     address: inputAddress.value,
     city: inputCity.value,
-    email: inputEmail.value
+    email: inputEmail.value,
   }
-  if (cart == null ||cart.length == "" || cart.length === 0 ||articles.length === 0) {
+  // console.log(checkValidInput(validationForm.firstName),
+    checkValidInput(validationForm.lastName),
+    checkValidInput(validationForm.address),
+    checkValidInput(validationForm.city),
+    checkValidInput(validationForm.email)
+
+  if (cart == null || cart.length == "" || cart.length === 0 || articles.length === 0) {
 
     alert("Your cart is empty, please add at least one item.");
     // si le panier es vide alors une alert previen qu'il faut ajouté un article
-   
+
     window.location.href = 'index.html'
-    
   } else if (
     checkValidInput(validationForm.firstName) == false ||
     checkValidInput(validationForm.lastName) == false ||
     checkValidInput(validationForm.address) == false ||
     checkValidInput(validationForm.city) == false ||
     checkValidInput(validationForm.email) == false
-    
   ) {
-    alert("Votre panier est vide, veuillez ajouter au moins un article.");
+    return;
   }
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    if (!emailRegex.test(inputEmail.value)) {
-      alert("l'adresse email n'est pas valide.");
-      return;
-    }
-    localStorage.setItem("contact", JSON.stringify(contact));
-    sendForm({ contact, products: cart.map((product) => product._id) })
-      .then((data) => {
-        localStorage.removeItem('cart');
-        window.location.href = 'confirmation.html?id=' + data.orderId;
-      });
-  
 
+  sendForm({ contact, products: cart.map((product) => product._id) })
+    .then((data) => {
+      localStorage.removeItem('cart');
+      window.location.href = 'confirmation.html?id=' + data.orderId;
+    });
 })
-
-
-
-
 

@@ -17,10 +17,8 @@ const url = `http://localhost:3000/api/products/${id}`;
 // objetcTemp = objet temporaire
 const article = {}
 
-
-
-
 // la function getCanapeId est une fonction temporaire qui indique l'appel des éléments obligatoire de l'article exemple : article.name = data.name le data.name nous indique le nom de l'article renseigner sur la page Product.js qui a tous les renseignements de chaque article.
+
 async function getCanapeId() {
   await fetch(url)
     .then(res => res.json())
@@ -34,8 +32,6 @@ async function getCanapeId() {
       article.altTxt = data.altTxt
     })
 }
-// getCanapeId()
-
 
 // Le choix de la couleur fonction qui renseigne dans le panier la couleur choisi par l'utilisateur.
 let color = document.getElementById("colors");
@@ -73,13 +69,9 @@ const renderProduct = async () => {
 };
 renderProduct();
 
-
-// articleTab est un tableau qui contien les articles du panier
-
 // articleTab est un tableau qui contien les articles du panier
 const articleTab = []
 const inlocalStorage = JSON.parse(localStorage.getItem("cart"))
-
 
 addToCart.addEventListener('click', () => {
 
@@ -89,15 +81,7 @@ addToCart.addEventListener('click', () => {
     (!choixColors() || !choixQte())
         return
       }
-  
-  // if (choixColors() && choixQte()){
-  //   alert("vous avez ajoutez un article à votre panier")
-  // }else
 
-  //   // si les deux fonctions non pas ete sélectionner avec leur valeur alors cela return false
-  // if (!choixColors() || !choixQte()){
-  //   return
-  // }
   let articlePanier = {
     _id: article._id,
     description: article.description,
@@ -121,11 +105,6 @@ addToCart.addEventListener('click', () => {
   } else {
     articleTab.push(articlePanier);
   }
-
   window.localStorage.setItem('cart', JSON.stringify(articleTab));
-  window.location.href = 'cart.html';
-})
-
-
-
+  window.location.href = 'cart.html';})
 
